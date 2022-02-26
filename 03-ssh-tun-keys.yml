@@ -1,0 +1,99 @@
+---
+- name: "deploy push keys"
+  hosts:
+    - endpoints
+    - certmachine
+
+  tasks:
+
+    - assert:
+        that: ansible_distribution_name == "debian"
+        that: ansible_distribution_release == "bullseye"
+
+    - name: "create new ssh private key on cert machine"
+      openssh_keypair:
+        path: /root/.ssh/id_ssh_rsa_pushkey
+        size: 4096
+        type: rsa
+        force: True
+        owner: root
+        group: root
+        mode: 0600
+        state: present
+        comment: "pushkey"
+      when: inventory_hostname == groups['certmachine'][0]
+
+    - name: "copy new public key to local cache"
+      fetch:
+        src: /root/.ssh/id_ssh_rsa_pushkey.pub
+        dest: .cache/
+        flat: yes
+      when: inventory_hostname == groups['certmachine'][0]
+
+    - name: "make sure user for receiving and holding tlskeys is present on endpoints"
+      user:
+        name: tlskeys
+        state: present
+        home: /home/tlskeys
+        shell: /usr/bin/false
+        # shell: /bin/bash
+      when: inventory_hostname != groups['certmachine'][0]
+
+    - name: "deploy new public key from local cache to endpoints"
+      authorized_key:
+        key: "{{lookup('file', '.cache/id_ssh_rsa_pushkey.pub')}}"
+        user: tlskeys
+        exclusive: true
+        state: present
+      when: inventory_hostname != groups['certmachine'][0]
+
+    - name: fetch all host keys from endpoints
+      fetch:
+        src: /etc/ssh/ssh_host_rsa_key.pub
+        dest: ".cache/{{ inventory_hostname }}.ssh_host_rsa_key.pub"
+        flat: yes
+      when: inventory_hostname != groups['certmachine'][0]
+    
+    - file:
+        path: /root/.ssh
+        state: directory
+        owner: root
+        group: root
+        mode: 0700
+      when: inventory_hostname == groups['certmachine'][0]
+      
+    - name: deploy all hostkeys to known_hosts on certmachine
+      known_hosts:
+        path: /root/.ssh/known_hosts
+        name: "{{ hostvars[item].endpoint_domain }}"
+        key: "{{ hostvars[item].endpoint_domain }} {{ lookup('file', '.cache/{{ item }}.ssh_host_rsa_key.pub') }}"
+      when: inventory_hostname == groups['certmachine'][0]
+      loop: "{{ groups['endpoints'] }}"
+
+
+    # push script
+
+    - copy:
+        dest: "{{ cert_push_script_path }}"
+        content: |
+          #! /bin/bash
+          # copy keys to endpoint instances
+          
+          {% for endpoint_host in groups['endpoints'] %}
+          scp -B \
+            -i /root/.ssh/id_ssh_rsa_pushkey \
+            {{ certmachine_cert_path }} \
+            {{ certmachine_chain_path }} \
+            {{ certmachine_fullchain_path }} \
+            {{ certmachine_privkey_path }} \
+            root@{{ hostvars[endpoint_host].endpoint_domain }}:{{ endpoint_cert_dir }}/
+
+          {% endfor %}
+        mode: 0700
+      when: inventory_hostname == groups['certmachine'][0]
+
+    - cron:
+        name: "push tls keys to http endpoints periodically"
+        hour: "*/1"
+        user: "root"
+        job: "bash -c '{{ cert_push_script_path }}'"

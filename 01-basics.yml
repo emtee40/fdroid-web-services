@@ -1,0 +1,151 @@
+---
+- name: "basic firewall setup"
+  hosts:
+    - endpoints
+    - certmachine
+
+  tasks:
+
+    - assert:
+        that: ansible_distribution_name == "debian"
+        that: ansible_distribution_release == "bullseye"
+
+    ##
+    # APT
+    #
+
+    - name: "apt: install debian packages for ansible secure apt setup"
+      apt:
+        install_recommends: no
+        update_cache: yes
+        name:
+          - apt-transport-tor
+          - iptables-persistent
+          - tor
+        state: present
+
+    - name: "systemd: make sure tor is running"
+      systemd: name=tor enabled=yes state=started
+
+    - name: "apt_repository: 5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion"
+      apt_repository:
+        repo: 'deb tor+http://5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion/debian-security {{ ansible_distribution_release }}-security main'
+        state: present
+        filename: 0.5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion
+        update_cache: no
+
+    - name: "apt_repository: 2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion"
+      copy:
+        content: |
+          deb tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }} main
+          #deb-src tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }} main
+          deb tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }}-updates main
+          #deb-src tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }}-updates main
+          deb tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }}-backports main
+          #deb-src tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }}-backports main
+        dest: /etc/apt/sources.list.d/0.2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion.list
+
+    - name: "apt_repository: deb.debian.org"
+      copy:
+        content: |
+          deb https://deb.debian.org/debian/ {{ ansible_distribution_release }} main
+          #deb-src https://deb.debian.org/debian/ {{ ansible_distribution_release }} main
+          deb https://deb.debian.org/debian/ {{ ansible_distribution_release }}-updates main
+          #deb-src https://deb.debian.org/debian/ {{ ansible_distribution_release }}-updates main
+          deb https://deb.debian.org/debian-security/ {{ ansible_distribution_release }}-security main
+          #deb-src https://deb.debian.org/debian-security/ {{ ansible_distribution_release }}-security main
+          deb https://deb.debian.org/debian/ {{ ansible_distribution_release }}-backports main
+          #deb-src https://deb.debian.org/debian/ {{ ansible_distribution_release }}-backports main
+        dest:  /etc/apt/sources.list.d/9.deb.debian.org.list
+
+    - name: "apt_repository: security.debian.org"
+      apt_repository:
+        repo: 'deb https://security.debian.org/debian-security/ {{ ansible_distribution_release }}-security main'
+        state: present
+        filename: 9.security.debian.org
+        update_cache: yes
+
+    - name: "copy: clear /etc/apt/sources.list"
+      copy:
+        content: ""
+        dest: "/etc/apt/sources.list"
+
+    - name: search for rouge pre-configured apt source list files
+      find:
+        paths: "/etc/apt/sources.list.d/"
+        file_type: file
+        excludes:
+          - "0.2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion.list"
+          - "0.5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion.list"
+          - "9.deb.debian.org.list"
+          - "9.security.debian.org.list"
+      register: rouge_apt_source_list_files
+
+    - name: delete rouge pre-configured apt source list files
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ rouge_apt_source_list_files['files'] }}"
+
+
+    ##
+    # SSH
+    #
+
+    - name: "sshd - require public key authentication, disallow password auth"
+      lineinfile:
+          path: '/etc/ssh/sshd_config'
+          regexp: '^[\s#]*PasswordAuthentication .*'
+          line: 'PasswordAuthentication no'
+      notify: reload_sshd
+
+    ##
+    # firewall
+    #
+
+    - name: "deploy persistent ipv4 iptables firewall rules"
+      copy:
+        dest: /etc/iptables/rules.v4
+        content: |
+            *filter
+            :INPUT DROP [0:0]
+            :FORWARD ACCEPT [0:0]
+            :OUTPUT ACCEPT [0:0]
+            -A INPUT -i lo -j ACCEPT
+            -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+            -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+            {% if inventory_hostname != groups['certmachine'][0] %}
+            -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+            -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+            {% endif %}
+            -A INPUT -p icmp --icmp-type 8 -j ACCEPT
+            COMMIT
+      notify: reload_iptables
+    - name: "deploy persistent ipv6 iptables firewall rules"
+      copy:
+        dest: /etc/iptables/rules.v6
+        content: |
+            *filter
+            :INPUT DROP [0:0]
+            :FORWARD ACCEPT [0:0]
+            :OUTPUT ACCEPT [0:0]
+            -A INPUT -i lo -j ACCEPT
+            -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+            -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+            {% if inventory_hostname != groups['certmachine'][0] %}
+            -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+            -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+            {% endif %}
+            -A INPUT -p icmpv6 -j ACCEPT
+            COMMIT
+      notify: reload_iptables
+
+  handlers:
+  - name: reload_iptables
+    systemd:
+      name: netfilter-persistent.service
+      state: restarted
+  - name: reload_sshd
+    systemd:
+      name: sshd.service
+      state: reloaded

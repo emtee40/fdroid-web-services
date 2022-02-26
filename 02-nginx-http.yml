@@ -1,0 +1,53 @@
+---
+- name: "todo merge this script"
+  hosts: endpoints
+
+  tasks:
+
+    - assert:
+        that: ansible_distribution_name == "debian"
+        that: ansible_distribution_release == "bullseye"
+
+    - name: "basic nginx setup"
+      block:
+        - apt:
+            install_recommends: no
+            state: present
+            name:
+              - nginx
+        - name: "blockinfile: nginx.conf customization"
+          blockinfile:
+            path: "/etc/nginx/nginx.conf"
+            insertafter: 'http {'
+            marker: "## {mark} ANSIBLE MANAGED BLOCK"
+            content: |
+                proxy_cache_path  /var/cache/nginx  levels=1:2  keys_zone=STATIC:10m  inactive=24h  max_size=1g;
+                # geoip_country /usr/share/GeoIP/GeoIPv6.dat;
+                # log_format privacy '0.0.0.0 - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "-" $geoip_country_code';
+
+    - name: "configure nginx"
+      block:
+        - name: "nginx : deploy http config"
+          template:
+            src: site-http.j2
+            dest: "/etc/nginx/sites-available/http"
+            owner: root
+            group: root
+          notify: nginx_reload
+        - name: "nginx : remove debians pre-configured default site"
+          file:
+            path: "/etc/nginx/sites-enabled/default"
+            state: absent
+          notify: nginx_reload
+        - name: "nginx : enable http config"
+          file:
+            src: "/etc/nginx/sites-available/http"
+            dest: "/etc/nginx/sites-enabled/http"
+            state: link
+          notify: nginx_reload
+
+  handlers:
+    - name: nginx_reload
+      service:
+        name: nginx
+        state: reloaded

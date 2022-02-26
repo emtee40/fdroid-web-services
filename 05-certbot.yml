@@ -1,0 +1,36 @@
+---
+- name: "setup cert machine"
+  hosts: certmachine
+
+  vars:
+    domains:
+      - fdroid-fronter.h4x.at
+      - fronter1.h4x.at
+
+  tasks:
+
+    - assert:
+        that: ansible_distribution_name == "debian"
+        that: ansible_distribution_release == "bullseye"
+
+    - name: "setup certbot certificates"
+      block:
+        - name: "make sure certbot is installed"
+          apt:
+            name: certbot
+            state: present
+            install_recommends: no
+        
+        - name: "check if cert is already present"
+          stat: "path=/etc/letsencrypt/renewal/{{ domains[0] }}.conf"
+          register: renewal_conf
+        
+        - name: "intial certificate request"
+          shell: "certbot certonly -n --standalone --agree-tos -d {{ domains | join(' -d ') }} -m {{ webmaster_mail }}"
+          when: renewal_conf.stat.exists == False
+        
+        - name: "enable automatic certificate renewal"
+          systemd:
+              name: certbot.timer
+              state: started
+              enabled: yes

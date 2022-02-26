@@ -1,0 +1,64 @@
+---
+- name: |-
+    setup permanent ssh tunnels for forwarting certmachine port 80 to a
+    local socket on each and every endpoint for certbot acme authentication
+  hosts: certmachine
+
+  tasks:
+
+    - assert:
+        that: ansible_distribution_name == "debian"
+        that: ansible_distribution_release == "bullseye"
+
+    - copy:
+        dest: "/root/tunscript.{{ item }}.sh"
+        content: |
+          #! /bin/bash
+          
+          ssh -v -N \
+            -oPasswordAuthentication=no \
+            -oForwardAgent=no \
+            -oForwardX11=no \
+            -oForwardX11Trusted=no \
+            -oGSSAPIDelegateCredentials=no \
+            -oExitOnForwardFailure=yes \
+            -oServerAliveInterval=30 \
+            -oServerAliveCountMax=3 \
+            -oStrictHostKeyChecking=yes \
+            -oVisualHostKey=no \
+            -R{{ cert_tun_port }}:localhost:80 \
+            -i /root/.ssh/id_ssh_rsa_pushkey \
+            tlskeys@{{ hostvars[item].endpoint_domain }}
+        owner: root
+        group: root
+        mode: 0700
+      loop: "{{ groups['endpoints'] }}"
+
+
+    - copy:
+        dest: "/lib/systemd/system/certbot-acme-tun-{{ item }}.service"
+        owner: "root"
+        group: "root"
+        mode: 0644
+        content: |
+          [Unit]
+          Description=SSH tunnel for handling certbot acme challenges
+          After=network.target
+
+          [Service]
+          Type=simple
+          User=root
+          SyslogIdentifier=certbot-acme-tun-{{ item }}
+          ExecStart=/bin/bash /root/tunscript.{{ item }}.sh
+          Restart=on-failure
+          RestartSec=60s
+      loop: "{{ groups['endpoints'] }}"
+
+    - systemd:
+        daemon_reload: yes
+
+    - systemd:
+        state: started
+        enabled: yes
+        service: "certbot-acme-tun-{{ item }}.service" 
+      loop: "{{ groups['endpoints'] }}"

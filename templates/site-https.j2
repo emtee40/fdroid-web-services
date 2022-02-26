@@ -1,0 +1,53 @@
+# generated 2022-03-01, Mozilla Guideline v5.6, nginx 1.18.0, OpenSSL 1.1.1k, intermediate configuration
+# https://ssl-config.mozilla.org/#server=nginx&version=1.18.0&config=intermediate&openssl=1.1.1k&guideline=5.6
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    ssl_certificate /home/tlskeys/fullchain.pem;
+    ssl_certificate_key /home/tlskeys/privkey.pem;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:MozSSL:10m;  # about 40000 sessions
+    ssl_session_tickets off;
+
+    # TODO: make a setup where dh params get regenerated ever so often
+    # curl https://ssl-config.mozilla.org/ffdhe2048.txt > /path/to/dhparam
+    # ssl_dhparam /path/to/dhparam;
+
+    # intermediate configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+
+    # HSTS (ngx_http_headers_module is required) (63072000 seconds)
+    add_header Strict-Transport-Security "max-age=63072000" always;
+
+    # OCSP stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
+
+    # verify chain of trust of OCSP response using Root CA and Intermediate certs
+    ssl_trusted_certificate /home/tlskeys/chain.pem;
+
+    # replace with the IP address of your resolver
+    # resolver 127.0.0.1;
+
+    location / {
+        proxy_pass             https://f-droid.org/;
+        proxy_buffering        on;
+        proxy_cache            STATIC;
+        proxy_cache_valid      200  1h;
+        proxy_cache_use_stale  error timeout invalid_header updating
+                               http_500 http_502 http_503 http_504;
+
+        sub_filter "http://f-droid.org" "https://fdroid-fronter.h4x.at";
+        sub_filter "https://f-droid.org" "https://fdroid-fronter.h4x.at";
+        sub_filter "http:\/\/f-droid.org\/" "https:\/\/fdroid-fronter.h4x.at\/";
+        sub_filter "https:\/\/f-droid.org\/" "https:\/\/fdroid-fronter.h4x.at\/";
+        sub_filter "http://" "https://";
+        sub_filter "http%3A%2F%2Ff-droid.org" "https%3A%2F%2Ffdroid-fronter.h4x.at";
+        sub_filter "https%3A%2F%2Ff-droid.org" "https%3A%2F%2Ffdroid-fronter.h4x.at";
+        sub_filter_once off;
+    }
+}
