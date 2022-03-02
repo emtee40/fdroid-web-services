@@ -7,30 +7,31 @@ cert-server to http-endpoints. It's scripted with ansible and targeting Debian
 bullseye servers.
 
 ```
-                                                     \
-  o----------o  o----------o           o----------o  |
-  |          |  |          |           |          |  | http endpoints
-  |  http01  |  |  http02  |   . . .   |  http n  |  | with caching
-  |          |  |          |           |          |  | (round robin
-  o----------o  o----------o           o----------o  |  dns)
-     ^    ^        ^    ^                 ^    ^     /
+                                                    \
+  o----------o  o----------o           o----------o  | http reverse
+  |          |  |          |           |          |  | proxies with
+  |  http01  |  |  http02  |   . . .   |  http n  |  | caching and
+  |          |  |          |           |          |  | round robin
+  o----------o  o----------o           o----------o  | dns setup
+     ^    ^        ^    ^                 ^    ^    /
      |    |        |    |                 |    |
      |    o-------------o----------------------o
      |             |                      |    |
      o-------------o----------------------o    |
-     |                                         |     \
-  o-------------o                              |     |
-  |             |                              |     | (certMachine)
-  |  cert-serv  |                              |     | certbot runs
-  |             |                              |     | here
-  o-------------o                              |     |
-                                               |     /
-                                               |
-                                               |     \
-                                   o--------------o  |
-                                   |              |  | upstream
-                                   |  web-server  |  | web server
-                                   |              |  | (not managed
-                                   o--------------o  | in this proj)
-                                                     /
+     |                                         |
+     |                                         |    \
+     |                             o-------------o   | maching for
+     |                             |             |   | tls certs
+     |                             | cert-server |   | (certbot)
+     |                             |             |   |
+     |                             o-------------o   |
+     |                                              /
+     |
+     |                                              \
+  o--------------o                                   | upstream
+  |              |                                   | web server
+  |  web-server  |                                   | (not managed
+  |              |                                   | in this proj)
+  o--------------o                                   |
+                                                    /
 ```
