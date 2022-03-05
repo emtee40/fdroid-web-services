@@ -69,31 +69,3 @@
         key: "{{ hostvars[item].endpoint_domain }} {{ lookup('file', '.cache/{{ item }}.ssh_host_rsa_key.pub') }}"
       when: inventory_hostname == groups['certmachine'][0]
       loop: "{{ groups['endpoints'] }}"
-
-
-    # push script
-
-    - copy:
-        dest: "{{ cert_push_script_path }}"
-        content: |
-          #! /bin/bash
-          # copy keys to endpoint instances
-          
-          {% for endpoint_host in groups['endpoints'] %}
-          scp -B \
-            -i /root/.ssh/id_ssh_rsa_pushkey \
-            {{ certmachine_cert_path }} \
-            {{ certmachine_chain_path }} \
-            {{ certmachine_fullchain_path }} \
-            {{ certmachine_privkey_path }} \
-            root@{{ hostvars[endpoint_host].endpoint_domain }}:{{ endpoint_cert_dir }}/
-
-          {% endfor %}
-        mode: 0700
-      when: inventory_hostname == groups['certmachine'][0]
-
-    - cron:
-        name: "push tls keys to http endpoints periodically"
-        hour: "*/1"
-        user: "root"
-        job: "bash -c '{{ cert_push_script_path }}'"

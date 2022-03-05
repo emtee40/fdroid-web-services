@@ -3,7 +3,6 @@
     deploy script and timer for pericodically pushing tls keys from certmachine
     to endpoints
   hosts:
-    - endpoints
     - certmachine
 
   tasks:
@@ -29,7 +28,6 @@
 
           {% endfor %}
         mode: 0700
-      when: inventory_hostname == groups['certmachine'][0]
 
     - cron:
         name: "push tls keys to http endpoints periodically"
