@@ -1,7 +1,7 @@
 ---
 cdn_domains:
   - "fdroid.h4x.at"
-webserver_root: "https://f-droid.org"
+source_webserver: "https://f-droid.org"
 cert_tun_port: 12380
 certmachine_web: "http://127.0.0.1:{{ cert_tun_port }}"
 webmaster_mail: "hostmaster@h4x.at"
@@ -17,4 +17,4 @@ endpoint_cert_dir: /home/tlskeys
 endpoint_cert_path: /{{ endpoint_cert_dir }}/cert.pem
 endpoint_chain_path: /{{ endpoint_cert_dir }}/chain.pem
 endpoint_fullchain_path: /{{ endpoint_cert_dir}}/fullchain.pem
-endpoint_privkey_path: /{{ endpoint_privkey_path }}/privkey.pem
+endpoint_privkey_path: /{{ endpoint_cert_dir }}/privkey.pem
