@@ -31,6 +31,9 @@
 
     - cron:
         name: "push tls keys to http endpoints periodically"
-        hour: "*/1"
+        hour: "7"
         user: "root"
-        job: "bash -c '{{ cert_push_script_path }}'"
+        job: "bash '{{ cert_push_script_path }}'"
+
+    - name: "push keys now"
+      command: "{{ cert_push_script_path }}"
