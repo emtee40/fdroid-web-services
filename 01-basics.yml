@@ -10,6 +10,9 @@
         that: ansible_distribution_name == "debian"
         that: ansible_distribution_release == "bullseye"
 
+    - name: lock root account password (for preventing other than pubkey-auth logins)
+      user: name=root password_lock=yes
+
     ##
     # APT
     #
