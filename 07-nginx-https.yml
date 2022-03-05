@@ -8,6 +8,20 @@
         that: ansible_distribution_name == "debian"
         that: ansible_distribution_release == "bullseye"
 
+    - stat:
+        path: "{{ item }}"
+      loop:
+        - "{{ endpoint_cert_dir }}/cert.pem"
+        - "{{ endpoint_cert_dir }}/chain.pem"
+        - "{{ endpoint_cert_dir }}/fullchain.pem"
+        - "{{ endpoint_cert_dir }}/privkey.pem"
+      register: pem_file_stats
+
+    - name: "make sure all certificate files are present on all endpoints"
+      assert:
+        that: "{{ item.stat.exists }}"
+      loop: "{{ pem_file_stats.results }}"
+
     - name: "blockinfile: nginx.conf customization"
       blockinfile:
         path: "/etc/nginx/nginx.conf"
