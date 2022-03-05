@@ -1,6 +1,6 @@
 ---
 cdn_domains:
-  - "fdroid-fronter.h4x.at"
+  - "fdroid.h4x.at"
 webserver_root: "https://f-droid.org"
 cert_tun_port: 12380
 certmachine_web: "http://127.0.0.1:{{ cert_tun_port }}"

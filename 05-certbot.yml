@@ -4,8 +4,9 @@
 
   vars:
     domains:
-      - fdroid-fronter.h4x.at
+      - fdroid.h4x.at
       - fronter1.h4x.at
+      - fronter2.h4x.at
 
   tasks:
 

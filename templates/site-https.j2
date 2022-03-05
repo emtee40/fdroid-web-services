@@ -41,13 +41,13 @@ server {
         proxy_cache_use_stale  error timeout invalid_header updating
                                http_500 http_502 http_503 http_504;
 
-        sub_filter "http://f-droid.org" "https://fdroid-fronter.h4x.at";
-        sub_filter "https://f-droid.org" "https://fdroid-fronter.h4x.at";
-        sub_filter "http:\/\/f-droid.org\/" "https:\/\/fdroid-fronter.h4x.at\/";
-        sub_filter "https:\/\/f-droid.org\/" "https:\/\/fdroid-fronter.h4x.at\/";
+        sub_filter "http://f-droid.org" "https://fdroid.h4x.at";
+        sub_filter "https://f-droid.org" "https://fdroid.h4x.at";
+        sub_filter "http:\/\/f-droid.org\/" "https:\/\/fdroid.h4x.at\/";
+        sub_filter "https:\/\/f-droid.org\/" "https:\/\/fdroid.h4x.at\/";
         sub_filter "http://" "https://";
-        sub_filter "http%3A%2F%2Ff-droid.org" "https%3A%2F%2Ffdroid-fronter.h4x.at";
-        sub_filter "https%3A%2F%2Ff-droid.org" "https%3A%2F%2Ffdroid-fronter.h4x.at";
+        sub_filter "http%3A%2F%2Ff-droid.org" "https%3A%2F%2Ffdroid.h4x.at";
+        sub_filter "https%3A%2F%2Ff-droid.org" "https%3A%2F%2Ffdroid.h4x.at";
         sub_filter_once off;
     }
 }
