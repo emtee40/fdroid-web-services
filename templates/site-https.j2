@@ -33,10 +33,11 @@ server {
     # resolver 127.0.0.1;
 
     location / {
-        proxy_pass             {{ source_webserver }};
+        proxy_pass             {{ origin_server }};
+
         proxy_buffering        on;
-        proxy_cache            STATIC;
-        proxy_cache_valid      200  1h;
+        proxy_cache            DEFAULT_ZONE;
+        proxy_cache_revalidate on;
         proxy_cache_use_stale  error timeout invalid_header updating
                                http_500 http_502 http_503 http_504;
 
