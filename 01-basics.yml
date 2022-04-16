@@ -14,6 +14,16 @@
       user: name=root password_lock=yes
 
     ##
+    # hostname
+    #
+
+    - name: Set a hostname specifying strategy
+      ansible.builtin.hostname:
+        name: "{{ endpoint_domain }}"
+        use: systemd
+      when: inventory_hostname != groups['certmachine'][0]
+
+    ##
     # APT
     #
 
