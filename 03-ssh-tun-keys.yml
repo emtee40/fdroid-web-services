@@ -21,14 +21,14 @@
         mode: 0600
         state: present
         comment: "pushkey"
-      when: inventory_hostname == groups['certmachine'][0]
+      when: inventory_hostname in groups['certmachine']
 
     - name: "copy new public key to local cache"
       fetch:
         src: /root/.ssh/id_ssh_rsa_pushkey.pub
         dest: .cache/
         flat: yes
-      when: inventory_hostname == groups['certmachine'][0]
+      when: inventory_hostname in groups['certmachine']
 
     - name: "make sure user for receiving and holding tlskeys is present on endpoints"
       user:
@@ -37,7 +37,7 @@
         home: /home/tlskeys
         shell: /usr/bin/false
         # shell: /bin/bash
-      when: inventory_hostname != groups['certmachine'][0]
+      when: inventory_hostname in groups['endpoints']
 
     - name: "deploy new public key from local cache to endpoints"
       authorized_key:
@@ -45,14 +45,14 @@
         user: tlskeys
         exclusive: true
         state: present
-      when: inventory_hostname != groups['certmachine'][0]
+      when: inventory_hostname in groups['endpoints']
 
     - name: fetch all host keys from endpoints
       fetch:
         src: /etc/ssh/ssh_host_rsa_key.pub
         dest: ".cache/{{ inventory_hostname }}.ssh_host_rsa_key.pub"
         flat: yes
-      when: inventory_hostname != groups['certmachine'][0]
+      when: inventory_hostname in groups['endpoints']
     
     - file:
         path: /root/.ssh
@@ -60,12 +60,12 @@
         owner: root
         group: root
         mode: 0700
-      when: inventory_hostname == groups['certmachine'][0]
+      when: inventory_hostname in groups['certmachine']
       
     - name: deploy all hostkeys to known_hosts on certmachine
       known_hosts:
         path: /root/.ssh/known_hosts
         name: "{{ hostvars[item].endpoint_domain }}"
         key: "{{ hostvars[item].endpoint_domain }} {{ lookup('file', '.cache/{{ item }}.ssh_host_rsa_key.pub') }}"
-      when: inventory_hostname == groups['certmachine'][0]
+      when: inventory_hostname in groups['certmachine']
       loop: "{{ groups['endpoints'] }}"
