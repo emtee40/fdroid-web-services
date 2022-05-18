@@ -17,7 +17,7 @@
     # hostname
     #
 
-    - name: Set a hostname specifying strategy
+    - name: set hostname
       ansible.builtin.hostname:
         name: "{{ endpoint_domain }}"
         use: systemd
@@ -112,6 +112,17 @@
           regexp: '^[\s#]*PasswordAuthentication .*'
           line: 'PasswordAuthentication no'
       notify: reload_sshd
+
+
+    - name: "ssh - authorized_keys: setup additional admin pub-keys"
+      authorized_key:
+        user: root
+        key: "{{ item.key }}"
+        state: present
+        # unique: yes
+      with_list: "{{ authorized_keys }}"
+      when: inventory_hostname in groups['endpoints']
+
 
     ##
     # firewall
