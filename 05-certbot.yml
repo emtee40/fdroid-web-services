@@ -3,10 +3,10 @@
   hosts: certmachine
 
   vars:
+    # TODO: fetch this list form vars
     domains:
       - fdroid.h4x.at
-      - fronter1.h4x.at
-      - fronter2.h4x.at
+      - http-01.h4x.at
 
   tasks:
 
