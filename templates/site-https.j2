@@ -5,8 +5,13 @@ server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
 
-    ssl_certificate {{ endpoint_fullchain_path }};
-    ssl_certificate_key {{ endpoint_privkey_path }};
+    # TODO: re-enable acme certificates once migration is complete
+    # for now we're using the old f-droid.org certificates
+    #
+    # ssl_certificate {{ endpoint_fullchain_path }};
+    # ssl_certificate_key {{ endpoint_privkey_path }};
+    ssl_certificate /etc/ssl/f-droid.org/fullchain.crt;
+    ssl_certificate_key /etc/ssl/f-droid.org/ssl.key;
     ssl_session_timeout 1d;
     ssl_session_cache shared:MozSSL:10m;  # about 40000 sessions
     ssl_session_tickets off;
@@ -27,8 +32,12 @@ server {
     ssl_stapling on;
     ssl_stapling_verify on;
 
+    # TODO: re-enable acme certificates once migration is complete
+    # for now we're using the old f-droid.org certificates
+    #
     # verify chain of trust of OCSP response using Root CA and Intermediate certs
-    ssl_trusted_certificate {{ endpoint_chain_path }};
+    # ssl_trusted_certificate {{ endpoint_chain_path }};
+    ssl_trusted_certificate /etc/ssl/f-droid.org/inter.crt;
 
     # replace with the IP address of your resolver
     # resolver 127.0.0.1;
@@ -41,17 +50,5 @@ server {
         proxy_cache_revalidate on;
         proxy_cache_use_stale  error timeout invalid_header updating
                                http_500 http_502 http_503 http_504;
-
-	# TODO:
-	# this is just for updating links in html while this running with a
-	# test domain. must be removed for production
-        sub_filter "http://f-droid.org" "https://fdroid.h4x.at";
-        sub_filter "https://f-droid.org" "https://fdroid.h4x.at";
-        sub_filter "http:\/\/f-droid.org\/" "https:\/\/fdroid.h4x.at\/";
-        sub_filter "https:\/\/f-droid.org\/" "https:\/\/fdroid.h4x.at\/";
-        sub_filter "http://" "https://";
-        sub_filter "http%3A%2F%2Ff-droid.org" "https%3A%2F%2Ffdroid.h4x.at";
-        sub_filter "https%3A%2F%2Ff-droid.org" "https%3A%2F%2Ffdroid.h4x.at";
-        sub_filter_once off;
     }
 }

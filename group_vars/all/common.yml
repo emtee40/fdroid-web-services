@@ -1,19 +1,19 @@
 ---
 cdn_domains:
-  - "fdroid.h4x.at"
+  - "f-droid.org"
 cert_tun_port: 12380
 certmachine_web: "http://127.0.0.1:{{ cert_tun_port }}"
 webmaster_mail: "hostmaster@h4x.at"
 
-cert_push_script_path: /root/pushkey.sh
+cert_push_script_path: "/root/pushkey.sh"
 
-certmachine_cert_path: /etc/letsencrypt/live/{{ cdn_domains[0] }}/cert.pem
-certmachine_chain_path: /etc/letsencrypt/live/{{ cdn_domains[0] }}/chain.pem
-certmachine_fullchain_path: /etc/letsencrypt/live/{{ cdn_domains[0] }}/fullchain.pem
-certmachine_privkey_path: /etc/letsencrypt/live/{{ cdn_domains[0] }}/privkey.pem
+certmachine_cert_path: "/etc/letsencrypt/live/{{ cdn_domains[0] }}/cert.pem"
+certmachine_chain_path: "/etc/letsencrypt/live/{{ cdn_domains[0] }}/chain.pem"
+certmachine_fullchain_path: "/etc/letsencrypt/live/{{ cdn_domains[0] }}/fullchain.pem"
+certmachine_privkey_path: "/etc/letsencrypt/live/{{ cdn_domains[0] }}/privkey.pem"
 
-endpoint_cert_dir: /home/tlskeys
-endpoint_cert_path: /{{ endpoint_cert_dir }}/cert.pem
-endpoint_chain_path: /{{ endpoint_cert_dir }}/chain.pem
-endpoint_fullchain_path: /{{ endpoint_cert_dir}}/fullchain.pem
-endpoint_privkey_path: /{{ endpoint_cert_dir }}/privkey.pem
+endpoint_cert_dir: "/home/tlskeys"
+endpoint_cert_path: "{{ endpoint_cert_dir }}/cert.pem"
+endpoint_chain_path: "{{ endpoint_cert_dir }}/chain.pem"
+endpoint_fullchain_path: "{{ endpoint_cert_dir}}/fullchain.pem"
+endpoint_privkey_path: "{{ endpoint_cert_dir }}/privkey.pem"

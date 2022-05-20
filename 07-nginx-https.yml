@@ -8,19 +8,22 @@
         that: ansible_distribution_name == "debian"
         that: ansible_distribution_release == "bullseye"
 
-    - stat:
-        path: "{{ item }}"
-      loop:
-        - "{{ endpoint_cert_dir }}/cert.pem"
-        - "{{ endpoint_cert_dir }}/chain.pem"
-        - "{{ endpoint_cert_dir }}/fullchain.pem"
-        - "{{ endpoint_cert_dir }}/privkey.pem"
-      register: pem_file_stats
+    # TODO: re-enable check for acme certs once migration is complete
+    # this is deactivated while we're migrating using the old f-droid.org certs
+    #
+    #- stat:
+    #    path: "{{ item }}"
+    #  loop:
+    #    - "{{ endpoint_cert_dir }}/cert.pem"
+    #    - "{{ endpoint_cert_dir }}/chain.pem"
+    #    - "{{ endpoint_cert_dir }}/fullchain.pem"
+    #    - "{{ endpoint_cert_dir }}/privkey.pem"
+    #  register: pem_file_stats
 
-    - name: "make sure all certificate files are present on all endpoints"
-      assert:
-        that: "{{ item.stat.exists }}"
-      loop: "{{ pem_file_stats.results }}"
+    #- name: "make sure all certificate files are present on all endpoints"
+    #  assert:
+    #    that: "{{ item.stat.exists }}"
+    #  loop: "{{ pem_file_stats.results }}"
 
     - name: "configure nginx"
       block:
