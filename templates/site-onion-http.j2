@@ -1,0 +1,21 @@
+server {
+    listen 127.0.0.1:80 default_server;
+    listen [::1]:80 default_server;
+
+    location / {
+        proxy_pass             {{ origin_server }};
+
+        proxy_buffering        on;
+        proxy_cache            DEFAULT_ZONE;
+        proxy_cache_revalidate on;
+        proxy_cache_use_stale  error timeout invalid_header updating;
+
+        sub_filter "http://f-droid.org" "http://{{ onion_address }}";
+        sub_filter "https://f-droid.org" "http://{{ onion_address }}";
+        sub_filter "http:\/\/f-droid.org" "http:\/\/{{ onion_address }}";
+        sub_filter "https:\/\/f-droid.org" "http:\/\/{{ onion_address }}";
+        sub_filter "http%3A%2F%2Ff-droid.org" "http%3A%2F%2F{{ onion_address }}";
+        sub_filter "https%3A%2F%2Ff-droid.org" "http%3A%2F%2F{{ onion_address }}";
+        sub_filter_once off;
+    }
+}

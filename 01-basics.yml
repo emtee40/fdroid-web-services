@@ -3,6 +3,7 @@
   hosts:
     - endpoints
     - certmachine
+    - onions
 
   tasks:
 
@@ -101,6 +102,25 @@
         state: absent
       with_items: "{{ rouge_apt_source_list_files['files'] }}"
 
+    ##
+    # install and configure some basic tools
+    #
+
+    - name: install some basic tools
+      apt:
+        install_recommends: no
+        state: present
+        name:
+          - vim
+    - name: setup basic vimrc
+      copy:
+        dest: /root/.vimrc
+        content: |
+          syntax on
+          set mouse-=a
+        owner: root
+        group: root
+        mode: 0644
 
     ##
     # SSH

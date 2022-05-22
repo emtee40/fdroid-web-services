@@ -1,0 +1,53 @@
+---
+- name: "setup http proxy for onion endpoint"
+  hosts: onions
+
+  tasks:
+
+    - assert:
+        that: ansible_distribution_name == "debian"
+        that: ansible_distribution_release == "bullseye"
+
+    - name: "basic nginx setup"
+      block:
+        - apt:
+            install_recommends: no
+            state: present
+            name:
+              - nginx
+              - libnginx-mod-http-subs-filter
+
+    - name: "configure nginx"
+      block:
+        - name: "blockinfile: nginx.conf customization"
+          blockinfile:
+            path: "/etc/nginx/nginx.conf"
+            insertafter: 'http {'
+            marker: "## {mark} ANSIBLE MANAGED BLOCK"
+            content: |
+                proxy_cache_path  /var/cache/nginx  levels=1:2  keys_zone=DEFAULT_ZONE:10m  inactive=24h  max_size={{ cache_default_zone_max_size }};
+          notify: nginx_reload
+        - name: "nginx : deploy http config"
+          template:
+            src: site-onion-http.j2
+            dest: "/etc/nginx/sites-available/http"
+            owner: root
+            group: root
+          notify: nginx_reload
+        - name: "nginx : remove debians pre-configured default site"
+          file:
+            path: "/etc/nginx/sites-enabled/default"
+            state: absent
+          notify: nginx_reload
+        - name: "nginx : enable http config"
+          file:
+            src: "/etc/nginx/sites-available/http"
+            dest: "/etc/nginx/sites-enabled/http"
+            state: link
+          notify: nginx_reload
+
+  handlers:
+    - name: nginx_reload
+      service:
+        name: nginx
+        state: reloaded
