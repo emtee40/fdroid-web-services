@@ -1,2 +1,15 @@
 ---
 cache_default_zone_max_size: 4g
+content_security_policy: >-
+    default-src 'none';
+    base-uri 'self';
+    block-all-mixed-content;
+    connect-src 'self';
+    font-src 'self';
+    form-action 'self' https://search.f-droid.org;
+    frame-ancestors 'self';
+    img-src 'self';
+    manifest-src 'self';
+    media-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';

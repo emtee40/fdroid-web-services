@@ -3,7 +3,7 @@ server {
   listen [::]:80 default_server;
 
   location ~ ^/.well-known/acme-challenge/ {
-      proxy_pass {{ certmachine_web }};
+    proxy_pass {{ certmachine_web }};
   }
 
   location / {

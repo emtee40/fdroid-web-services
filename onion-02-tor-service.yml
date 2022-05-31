@@ -5,15 +5,16 @@
   tasks:
 
     - assert:
-        that: ansible_distribution_name == "debian"
-        that: ansible_distribution_release == "bullseye"
+        that:
+          - ansible_distribution == "Debian"
+          - ansible_distribution_release == "bullseye"
 
     - name: "blockinfile: configure tor service"
       blockinfile:
         path: "/etc/tor/torrc"
         marker: "## {mark} ANSIBLE MANAGED BLOCK"
         content: |
-          HiddenServiceDir /var/lib/tor/other_hidden_service/
+          HiddenServiceDir /var/lib/tor/{{ onion_address }}/
           HiddenServicePort 80 127.0.0.1:80
       notify: tor_reload
 

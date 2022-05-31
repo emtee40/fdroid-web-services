@@ -1,12 +1,14 @@
 ---
 - name: "setup http proxy for onion endpoint"
   hosts: onions
+  gather_facts: yes
 
   tasks:
 
     - assert:
-        that: ansible_distribution_name == "debian"
-        that: ansible_distribution_release == "bullseye"
+        that:
+          - ansible_distribution == "Debian"
+          - ansible_distribution_release == "bullseye"
 
     - name: "basic nginx setup"
       block:
