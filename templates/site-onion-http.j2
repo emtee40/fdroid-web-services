@@ -1,0 +1,29 @@
+server {
+  listen 127.0.0.1:80 default_server;
+  listen [::1]:80 default_server;
+
+  location / {
+    proxy_pass {{ origin_server }};
+    proxy_set_header Accept-Encoding "";
+
+    proxy_buffering        on;
+    proxy_cache            DEFAULT_ZONE;
+    proxy_cache_revalidate on;
+    proxy_cache_use_stale  error timeout invalid_header updating;
+
+    # we're not doing https so we don't need this header
+    proxy_hide_header Strict-Transport-Security;
+
+    # making sure only the onion service adresses are allowed
+    proxy_hide_header Content-Security-Policy;
+    add_header Content-Security-Policy "{{ content_security_policy }}";
+
+    sub_filter "http://f-droid.org" "http://{{ onion_address }}";
+    sub_filter "https://f-droid.org" "http://{{ onion_address }}";
+    sub_filter "http:\/\/f-droid.org" "http:\/\/{{ onion_address }}";
+    sub_filter "https:\/\/f-droid.org" "http:\/\/{{ onion_address }}";
+    sub_filter "http%3A%2F%2Ff-droid.org" "http%3A%2F%2F{{ onion_address }}";
+    sub_filter "https%3A%2F%2Ff-droid.org" "http%3A%2F%2F{{ onion_address }}";
+    sub_filter_once off;
+  }
+}

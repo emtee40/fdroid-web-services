@@ -3,12 +3,15 @@
   hosts:
     - endpoints
     - certmachine
+    - onions
 
   tasks:
 
     - assert:
-        that: ansible_distribution_name == "debian"
-        that: ansible_distribution_release == "bullseye"
+        that: "{{ item }}"
+      with_items:
+        - ansible_distribution == 'Debian'
+        - ansible_distribution_release == 'bullseye'
 
     - name: lock root account password (for preventing other than pubkey-auth logins)
       user: name=root password_lock=yes
@@ -101,6 +104,25 @@
         state: absent
       with_items: "{{ rouge_apt_source_list_files['files'] }}"
 
+    ##
+    # install and configure some basic tools
+    #
+
+    - name: install some basic tools
+      apt:
+        install_recommends: no
+        state: present
+        name:
+          - vim
+    - name: setup basic vimrc
+      copy:
+        dest: /root/.vimrc
+        content: |
+          syntax on
+          set mouse-=a
+        owner: root
+        group: root
+        mode: 0644
 
     ##
     # SSH

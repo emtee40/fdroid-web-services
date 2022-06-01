@@ -3,6 +3,8 @@
   hosts:
     - endpoints
     - certmachine
+    - onions
+
   tasks:
     - name: Update and upgrade apt packages
       apt:

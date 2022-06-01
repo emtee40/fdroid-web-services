@@ -11,8 +11,9 @@
   tasks:
 
     - assert:
-        that: ansible_distribution_name == "debian"
-        that: ansible_distribution_release == "bullseye"
+        that:
+          - ansible_distribution == "Debian"
+          - ansible_distribution_release == "bullseye"
 
     - name: "setup certbot certificates"
       block:

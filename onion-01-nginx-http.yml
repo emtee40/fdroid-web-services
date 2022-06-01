@@ -1,6 +1,7 @@
 ---
-- name: "todo merge this script"
-  hosts: endpoints
+- name: "setup http proxy for onion endpoint"
+  hosts: onions
+  gather_facts: yes
 
   tasks:
 
@@ -16,7 +17,10 @@
             state: present
             name:
               - nginx
-              - geoip-database
+              - libnginx-mod-http-subs-filter
+
+    - name: "configure nginx"
+      block:
         - name: "blockinfile: nginx.conf customization"
           blockinfile:
             path: "/etc/nginx/nginx.conf"
@@ -24,22 +28,10 @@
             marker: "## {mark} ANSIBLE MANAGED BLOCK"
             content: |
                 proxy_cache_path  /var/cache/nginx  levels=1:2  keys_zone=DEFAULT_ZONE:10m  inactive=24h  max_size={{ cache_default_zone_max_size }};
-                geoip_country /usr/share/GeoIP/GeoIPv6.dat;
-                log_format privacy '0.0.0.0 - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "-" $geoip_country_code';
           notify: nginx_reload
-        - name: "replace: configure privacy freindly nginx access logging"
-          replace:
-            path: "/etc/nginx/nginx.conf"
-            regexp: "access_log .*;"
-            replace: "access_log /var/log/nginx/access.log privacy;"
-          notify: nginx_reload
-
-
-    - name: "configure nginx"
-      block:
         - name: "nginx : deploy http config"
           template:
-            src: site-http.j2
+            src: site-onion-http.j2
             dest: "/etc/nginx/sites-available/http"
             owner: root
             group: root
