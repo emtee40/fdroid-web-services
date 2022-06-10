@@ -37,6 +37,7 @@ server {
     sub_filter "http://f-droid.org" "http://{{ onion_address }}";
     sub_filter "https://f-droid.org" "http://{{ onion_address }}";
     sub_filter "https://fdroid.tetaneutral.net/fdroid/repo/" "http://{{ onion_address }}/repo/";
+    sub_filter "https://ftp.fau.de/fdroid/repo/" "http://{{ onion_address }}/repo/";
 
     sub_filter "/static/" "/search/static/";
   }
