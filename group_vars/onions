@@ -1,5 +1,5 @@
 ---
-cache_default_zone_max_size: 4g
+cache_default_zone_max_size: 10g
 content_security_policy: >-
     default-src 'none';
     base-uri 'self';
