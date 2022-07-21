@@ -44,23 +44,23 @@
     - name: "systemd: make sure tor is running"
       systemd: name=tor enabled=yes state=started
 
-    - name: "apt_repository: 5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion"
-      apt_repository:
-        repo: 'deb tor+http://5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion/debian-security {{ ansible_distribution_release }}-security main'
-        state: present
-        filename: 0.5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion
-        update_cache: no
+    #- name: "apt_repository: 5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion"
+    #  apt_repository:
+    #    repo: 'deb tor+http://5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion/debian-security {{ ansible_distribution_release }}-security main'
+    #    state: present
+    #    filename: 0.5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion
+    #    update_cache: no
 
-    - name: "apt_repository: 2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion"
-      copy:
-        content: |
-          deb tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }} main
-          #deb-src tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }} main
-          deb tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }}-updates main
-          #deb-src tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }}-updates main
-          deb tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }}-backports main
-          #deb-src tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }}-backports main
-        dest: /etc/apt/sources.list.d/0.2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion.list
+    #- name: "apt_repository: 2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion"
+    #  copy:
+    #    content: |
+    #      deb tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }} main
+    #      #deb-src tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }} main
+    #      deb tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }}-updates main
+    #      #deb-src tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }}-updates main
+    #      deb tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }}-backports main
+    #      #deb-src tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ {{ ansible_distribution_release }}-backports main
+    #    dest: /etc/apt/sources.list.d/0.2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion.list
 
     - name: "apt_repository: deb.debian.org"
       copy:
@@ -133,6 +133,13 @@
           path: '/etc/ssh/sshd_config'
           regexp: '^[\s#]*PasswordAuthentication .*'
           line: 'PasswordAuthentication no'
+      notify: reload_sshd
+
+    - name: "sshd - require public key authentication, disallow password auth"
+      lineinfile:
+          path: '/etc/ssh/sshd_config'
+          regexp: '^[\s#]*PermitRootLogin .*'
+          line: 'PermitRootLogin prohibit-password'
       notify: reload_sshd
 
 

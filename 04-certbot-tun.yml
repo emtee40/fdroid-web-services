@@ -1,6 +1,6 @@
 ---
 - name: |-
-    setup permanent ssh tunnels for forwarting certmachine port 80 to a
+    setup permanent ssh tunnels for forwarding certmachine port 80 to a
     local socket on each and every endpoint for certbot acme authentication
   hosts: certmachine
 
