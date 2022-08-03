@@ -46,6 +46,9 @@
           Description=SSH tunnel for handling certbot acme challenges
           After=network.target
 
+          [Install]
+          WantedBy=multi-user.target
+
           [Service]
           Type=simple
           User=root
