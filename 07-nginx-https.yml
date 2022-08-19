@@ -28,17 +28,17 @@
 
     - name: "configure nginx"
       block:
-        - name: "nginx : enable https site config"
-          file:
-            src: "/etc/nginx/sites-available/https"
-            dest: "/etc/nginx/sites-enabled/https"
-            state: link
         - name: "deploy nginx https site config"
           template:
             src: site-https.j2
             dest: "/etc/nginx/sites-available/https"
             validate: "bash -c 'nginx -t # %s'"
           notify: nginx_reload
+        - name: "nginx : enable https site config"
+          file:
+            src: "/etc/nginx/sites-available/https"
+            dest: "/etc/nginx/sites-enabled/https"
+            state: link
 
   handlers:
     - name: nginx_reload

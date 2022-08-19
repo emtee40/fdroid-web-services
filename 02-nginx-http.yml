@@ -43,11 +43,6 @@
           file:
             path: "/etc/nginx/sites-enabled/default"
             state: absent
-        - name: "nginx : enable http config"
-          file:
-            src: "/etc/nginx/sites-available/http"
-            dest: "/etc/nginx/sites-enabled/http"
-            state: link
         - name: "nginx : deploy http config"
           template:
             src: site-http.j2
@@ -56,6 +51,11 @@
             group: root
             validate: "/bin/bash -c 'nginx -t # %s'"
           notify: nginx_reload
+        - name: "nginx : enable http config"
+          file:
+            src: "/etc/nginx/sites-available/http"
+            dest: "/etc/nginx/sites-enabled/http"
+            state: link
 
   handlers:
     - name: nginx_reload
