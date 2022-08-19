@@ -22,7 +22,7 @@
 
     - name: set hostname
       ansible.builtin.hostname:
-        name: "{{ endpoint_domain }}"
+        name: "{{ endpoint_hostname }}"
         use: systemd
       when: inventory_hostname in groups['endpoints']
 

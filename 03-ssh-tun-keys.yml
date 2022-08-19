@@ -66,7 +66,7 @@
     - name: deploy all hostkeys to known_hosts on certmachine
       known_hosts:
         path: /root/.ssh/known_hosts
-        name: "{{ hostvars[item].endpoint_domain }}"
-        key: "{{ hostvars[item].endpoint_domain }} {{ lookup('file', '.cache/{{ item }}.ssh_host_rsa_key.pub') }}"
+        name: "{{ hostvars[item].endpoint_ip }}"
+        key: "{{ hostvars[item].endpoint_ip }} {{ lookup('file', '.cache/{{ item }}.ssh_host_rsa_key.pub') }}"
       when: inventory_hostname in groups['certmachine']
       loop: "{{ groups['endpoints'] }}"

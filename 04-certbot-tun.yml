@@ -18,6 +18,7 @@
           
           ssh -v -N \
             -oPasswordAuthentication=no \
+            -oIdentitiesOnly=yes \
             -oForwardAgent=no \
             -oForwardX11=no \
             -oForwardX11Trusted=no \
@@ -29,7 +30,7 @@
             -oVisualHostKey=no \
             -R{{ cert_tun_port }}:localhost:80 \
             -i /root/.ssh/id_ssh_rsa_pushkey \
-            tlskeys@{{ hostvars[item].endpoint_domain }}
+            tlskeys@{{ hostvars[item].endpoint_ip }}
         owner: root
         group: root
         mode: 0700

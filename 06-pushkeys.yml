@@ -25,7 +25,7 @@
             {{ certmachine_chain_path }} \
             {{ certmachine_fullchain_path }} \
             {{ certmachine_privkey_path }} \
-            root@{{ hostvars[endpoint_host].endpoint_domain }}:{{ endpoint_cert_dir }}/
+            root@{{ hostvars[endpoint_host].endpoint_ip }}:{{ endpoint_cert_dir }}/
 
           {% endfor %}
         mode: 0700
