@@ -1,6 +1,9 @@
 ---
 cdn_domains:
   - "f-droid.org"
+  - "fdroid.org"
+  - "www.f-droid.org"
+  - "www.fdroid.org"
 cert_tun_port: 12380
 certmachine_web: "http://127.0.0.1:{{ cert_tun_port }}"
 webmaster_mail: "hostmaster@h4x.at"

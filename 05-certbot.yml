@@ -2,14 +2,6 @@
 - name: "setup cert machine"
   hosts: certmachine
 
-  vars:
-    # TODO: fetch this list form vars
-    domains:
-      - f-droid.org
-      - fdroid.org
-      - www.f-droid.org
-      - www.fdroid.org
-
   tasks:
 
     - assert:
@@ -26,11 +18,11 @@
             install_recommends: no
         
         - name: "check if cert is already present"
-          stat: "path=/etc/letsencrypt/renewal/{{ domains[0] }}.conf"
+          stat: "path=/etc/letsencrypt/renewal/{{ cdn_domains[0] }}.conf"
           register: renewal_conf
         
         - name: "intial certificate request"
-          shell: "certbot certonly -n --standalone --agree-tos -d {{ domains | join(' -d ') }} -m {{ webmaster_mail }}"
+          shell: "certbot certonly -n --standalone --agree-tos -d {{ cdn_domains | join(' -d ') }} -m {{ webmaster_mail }}"
           when: renewal_conf.stat.exists == False
         
         - name: "enable automatic certificate renewal"
