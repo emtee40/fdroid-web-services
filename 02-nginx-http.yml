@@ -1,6 +1,8 @@
 ---
 - name: "todo merge this script"
   hosts: endpoints
+  become: yes
+  become_method: sudo
 
   tasks:
 

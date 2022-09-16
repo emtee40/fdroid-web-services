@@ -1,6 +1,8 @@
 ---
 - name: "setup fronters"
   hosts: endpoints
+  become: yes
+  become_method: sudo
 
   tasks:
 

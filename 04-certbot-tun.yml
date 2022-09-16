@@ -3,6 +3,8 @@
     setup permanent ssh tunnels for forwarding certmachine port 80 to a
     local socket on each and every endpoint for certbot acme authentication
   hosts: certmachine
+  become: yes
+  become_method: sudo
 
   tasks:
 
@@ -12,7 +14,7 @@
           - ansible_distribution_release == "bullseye"
 
     - copy:
-        dest: "/root/tunscript.{{ item }}.sh"
+        dest: "/home/debian/tunscript.{{ item }}.sh"
         content: |
           #! /bin/bash
           
@@ -29,10 +31,10 @@
             -oStrictHostKeyChecking=yes \
             -oVisualHostKey=no \
             -R{{ cert_tun_port }}:localhost:80 \
-            -i /root/.ssh/id_ssh_rsa_pushkey \
+            -i /home/debian/.ssh/id_ssh_rsa_pushkey \
             tlskeys@{{ hostvars[item].endpoint_ip }}
-        owner: root
-        group: root
+        owner: debian
+        group: debian
         mode: 0700
       loop: "{{ groups['endpoints'] }}"
 
@@ -52,9 +54,9 @@
 
           [Service]
           Type=simple
-          User=root
+          User=debian
           SyslogIdentifier=certbot-acme-tun-{{ item }}
-          ExecStart=/bin/bash /root/tunscript.{{ item }}.sh
+          ExecStart=/bin/bash /home/debian/tunscript.{{ item }}.sh
           Restart=on-failure
           RestartSec=60s
       loop: "{{ groups['endpoints'] }}"

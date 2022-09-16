@@ -1,9 +1,7 @@
 [endpoints]
-fdroidHttp01
-fdroidHttp02
+fdroidTestFronter01
 
 [certmachine]
-fdroidCertmachine
+fdroidTestCertmachine
 
 [onions]
-fdroidOnion01

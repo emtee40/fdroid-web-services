@@ -1,2 +1,2 @@
 ---
-cache_default_zone_max_size: 100g
+cache_default_zone_max_size: 1g

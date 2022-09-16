@@ -1,14 +1,11 @@
 ---
 cdn_domains:
-  - "f-droid.org"
-  - "fdroid.org"
-  - "www.f-droid.org"
-  - "www.fdroid.org"
+  - "fdroid.the-abstractors.com"
 cert_tun_port: 12380
 certmachine_web: "http://127.0.0.1:{{ cert_tun_port }}"
 webmaster_mail: "hostmaster@h4x.at"
 
-cert_push_script_path: "/root/pushkey.sh"
+cert_push_script_path: "/home/debian/pushkey.sh"
 
 certmachine_cert_path: "/etc/letsencrypt/live/{{ cdn_domains[0] }}/cert.pem"
 certmachine_chain_path: "/etc/letsencrypt/live/{{ cdn_domains[0] }}/chain.pem"

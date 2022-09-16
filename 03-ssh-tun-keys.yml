@@ -3,6 +3,8 @@
   hosts:
     - endpoints
     - certmachine
+  become: yes
+  become_method: sudo
 
   tasks:
 
@@ -13,12 +15,12 @@
 
     - name: "create new ssh private key on cert machine"
       openssh_keypair:
-        path: /root/.ssh/id_ssh_rsa_pushkey
+        path: /home/debian/.ssh/id_ssh_rsa_pushkey
         size: 4096
         type: rsa
         force: True
-        owner: root
-        group: root
+        owner: debian
+        group: debian
         mode: 0600
         state: present
         comment: "pushkey"
@@ -26,7 +28,7 @@
 
     - name: "copy new public key to local cache"
       fetch:
-        src: /root/.ssh/id_ssh_rsa_pushkey.pub
+        src: /home/debian/.ssh/id_ssh_rsa_pushkey.pub
         dest: .cache/
         flat: yes
       when: inventory_hostname in groups['certmachine']
@@ -36,7 +38,7 @@
         name: tlskeys
         state: present
         home: /home/tlskeys
-        shell: /usr/bin/false
+        shell: /bin/bash
         # shell: /bin/bash
       when: inventory_hostname in groups['endpoints']
 
@@ -56,16 +58,16 @@
       when: inventory_hostname in groups['endpoints']
     
     - file:
-        path: /root/.ssh
+        path: /home/debian/.ssh
         state: directory
-        owner: root
-        group: root
+        owner: debian
+        group: debian
         mode: 0700
       when: inventory_hostname in groups['certmachine']
       
     - name: deploy all hostkeys to known_hosts on certmachine
       known_hosts:
-        path: /root/.ssh/known_hosts
+        path: /home/debian/.ssh/known_hosts
         name: "{{ hostvars[item].endpoint_ip }}"
         key: "{{ hostvars[item].endpoint_ip }} {{ lookup('file', '.cache/{{ item }}.ssh_host_rsa_key.pub') }}"
       when: inventory_hostname in groups['certmachine']

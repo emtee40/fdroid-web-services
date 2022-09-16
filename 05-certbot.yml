@@ -1,6 +1,8 @@
 ---
 - name: "setup cert machine"
   hosts: certmachine
+  become: yes
+  become_method: sudo
 
   tasks:
 

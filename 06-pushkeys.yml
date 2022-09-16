@@ -4,6 +4,8 @@
     to endpoints
   hosts:
     - certmachine
+  become: yes
+  become_method: sudo
 
   tasks:
 
@@ -17,23 +19,32 @@
         content: |
           #! /bin/bash
           # copy keys to endpoint instances
+
+          set -euo pipefail
+
+          sudo chown debian:debian -R /etc/letsencrypt
           
           {% for endpoint_host in groups['endpoints'] %}
           scp -B \
-            -i /root/.ssh/id_ssh_rsa_pushkey \
+            -i /home/debian/.ssh/id_ssh_rsa_pushkey \
+            -o IdentitiesOnly=yes \
             {{ certmachine_cert_path }} \
             {{ certmachine_chain_path }} \
             {{ certmachine_fullchain_path }} \
             {{ certmachine_privkey_path }} \
-            root@{{ hostvars[endpoint_host].endpoint_ip }}:{{ endpoint_cert_dir }}/
-
+            tlskeys@{{ hostvars[endpoint_host].endpoint_ip }}:{{ endpoint_cert_dir }}/
           {% endfor %}
+
+          sudo chown root:root -R /etc/letsencrypt
+
         mode: 0700
+        owner: debian
+        group: debian
 
     - cron:
         name: "push tls keys to http endpoints periodically"
         hour: "7"
-        user: "root"
+        user: "debian"
         job: "bash '{{ cert_push_script_path }}'"
 
     - name: "push keys now"

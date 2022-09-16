@@ -1,2 +1,2 @@
 ---
-cert_push_script_path: '/root/pushkeys.sh'
+cert_push_script_path: '/home/debian/pushkeys.sh'
