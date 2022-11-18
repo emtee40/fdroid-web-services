@@ -21,11 +21,13 @@
           {% for endpoint_host in groups['endpoints'] %}
           scp -B \
             -i /root/.ssh/id_ssh_rsa_pushkey \
+            -o "IdentitiesOnly=yes" \
+            -o "ForwardAgent=no" \
             {{ certmachine_cert_path }} \
             {{ certmachine_chain_path }} \
             {{ certmachine_fullchain_path }} \
             {{ certmachine_privkey_path }} \
-            root@{{ hostvars[endpoint_host].endpoint_ip }}:{{ endpoint_cert_dir }}/
+            tlskeys@{{ hostvars[endpoint_host].endpoint_ip }}:{{ endpoint_cert_dir }}/
 
           {% endfor %}
         mode: 0700
@@ -33,6 +35,7 @@
     - cron:
         name: "push tls keys to http endpoints periodically"
         hour: "7"
+        minute: "7"
         user: "root"
         job: "bash '{{ cert_push_script_path }}'"
 

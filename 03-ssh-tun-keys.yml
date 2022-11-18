@@ -36,8 +36,7 @@
         name: tlskeys
         state: present
         home: /home/tlskeys
-        shell: /usr/bin/false
-        # shell: /bin/bash
+        shell: /bin/bash
       when: inventory_hostname in groups['endpoints']
 
     - name: "deploy new public key from local cache to endpoints"
