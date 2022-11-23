@@ -45,4 +45,8 @@ server {
 
     sub_filter "/static/" "/search/static/";
   }
+
+  location /fdroid/repo {
+    proxy_pass {{ origin_server }}/repo;
+  }
 }
