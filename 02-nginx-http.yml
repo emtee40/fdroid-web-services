@@ -35,6 +35,20 @@
             replace: "access_log /var/log/nginx/access.log privacy;"
             validate: "/bin/bash -c 'nginx -t # %s'"
           notify: nginx_reload
+        - name: "lineinfile: configure nginx.conf worker_rlimit_nofile"
+          lineinfile:
+            path: /etc/nginx/nginx.conf
+            regexp: "\\s*worker_rlimit_nofile\\s.*"
+            insertbefore: "events {"
+            line: "worker_rlimit_nofile 50000;"
+            validate: "/bin/bash -c 'nginx -t # %s'"
+        - name: "lineinfile: configure nginx.conf worker_connections"
+          lineinfile:
+            path: /etc/nginx/nginx.conf
+            regexp: "\\s*worker_connections\\s.*"
+            insertafter: 'events {'
+            line: "\tworker_connections 4000;"
+            validate: "/bin/bash -c 'nginx -t # %s'"
 
 
     - name: "configure nginx"
