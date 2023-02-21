@@ -38,6 +38,7 @@
           - apt-transport-tor
           - iptables-persistent
           - tor
+          - unattended-upgrades
         state: present
         cache_valid_time: 8640000  # ommit cache update when chache has been updated in the last 100 days
 
