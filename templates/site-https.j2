@@ -50,4 +50,9 @@ server {
         proxy_cache_use_stale  error timeout invalid_header updating
                                http_500 http_502 http_503 http_504;
     }
+
+    location /fdroid/repo {
+        proxy_pass {{ origin_server }}/repo;
+    }
+
 }
