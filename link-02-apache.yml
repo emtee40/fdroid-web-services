@@ -1,0 +1,101 @@
+---
+- name: "setup apache2 to serve a static website"
+  hosts:
+    - link
+
+  tasks:
+
+    - name: "assert running on debian"
+      assert:
+        that: "{{ item }}"
+      with_items:
+        - ansible_distribution == 'Debian'
+        - ansible_distribution_release == 'bookworm'
+
+    - name: lock root account password (for preventing other than pubkey-auth logins)
+      user: name=root password_lock=yes
+
+    - name: "apt: install apache2"
+      apt:
+        install_recommends: no
+        update_cache: yes
+        name:
+          - apache2
+        state: present
+        cache_valid_time: 8640000  # ommit cache update when chache has been updated in the last 100 days
+
+    - name: "apache2_module: enable ssl"
+      apache2_module:
+        state: present
+        name: ssl
+      notify: restart_apache2
+
+    - name: "apache2_module: enable md"
+      apache2_module:
+        state: present
+        name: md
+      notify: restart_apache2
+
+    - name: "file: disable default apache site config"
+      file:
+        path: /etc/apache2/sites-enabled/000-default.conf
+        state: absent
+      notify: reload_apache2
+
+    - name: "file: setup fdroid link"
+      file:
+        path: /srv/www/fdroid.link
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: 0755
+      notify: reload_apache2
+
+    - name: "copy: setup apache site config for fdroid.link"
+      copy:
+        dest: /etc/apache2/sites-available/fdroid.link.conf
+        content: |
+          MDomain fdroid.link
+          MDContactEmail webmaster@h4x.at
+          MDCertificateAgreement accepted
+          DirectoryIndex index.html
+
+          <Directory "/srv/www/fdroid.link">
+            Require all granted
+          </Directory>
+
+          <VirtualHost *:80>
+            ServerName fdroid.link
+            ServerAlias fdroid.link
+            Redirect permanent / https://fdroid.link/
+          </VirtualHost>
+
+          <VirtualHost *:443>
+            ServerName fdroid.link
+            ServerAlias fdroid.link
+            SSLEngine on
+            DocumentRoot /srv/www/fdroid.link
+          </VirtualHost>
+        owner: root
+        group: root
+        mode: 0644
+      notify: reload_apache2
+
+    - name: "file: enable fdroid.link apache config"
+      file:
+        src: /etc/apache2/sites-available/fdroid.link.conf
+        dest: /etc/apache2/sites-enabled/fdroid.link.conf
+        owner: root
+        group: root
+        state: link
+      notify: reload_apache2
+
+  handlers:
+  - name: restart_apache2
+    systemd:
+      name: apache2.service
+      state: restarted
+  - name: reload_apache2
+    systemd:
+      name: apache2.service
+      state: reloaded
