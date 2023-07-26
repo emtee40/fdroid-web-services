@@ -24,16 +24,22 @@
         state: present
         cache_valid_time: 8640000  # ommit cache update when chache has been updated in the last 100 days
 
-    - name: "apache2_module: enable ssl"
-      apache2_module:
-        state: present
-        name: ssl
+    - name: "file: enable apache module: ssl"
+      file:
+        src: "../mods-available/ssl.load"
+        dest: /etc/apache2/mods-enabled/ssl.load
+        owner: root
+        group: root
+        state: link
       notify: restart_apache2
 
-    - name: "apache2_module: enable md"
-      apache2_module:
-        state: present
-        name: md
+    - name: "file: enable apache module: md"
+      file:
+        src: "../mods-available/md.load"
+        dest: /etc/apache2/mods-enabled/md.load
+        owner: root
+        group: root
+        state: link
       notify: restart_apache2
 
     - name: "file: disable default apache site config"
