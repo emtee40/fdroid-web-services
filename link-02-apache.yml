@@ -1,0 +1,99 @@
+---
+- name: "setup apache2 to serve a static website"
+  hosts:
+    - link
+
+  tasks:
+
+    - name: "assert running on debian"
+      assert:
+        that: "{{ item }}"
+      with_items:
+        - ansible_distribution == 'Debian'
+        - ansible_distribution_release == 'bookworm'
+
+    - name: lock root account password (for preventing other than pubkey-auth logins)
+      user: name=root password_lock=yes
+
+    - name: "apt: install apache2"
+      apt:
+        install_recommends: no
+        update_cache: yes
+        name:
+          - apache2
+          - libapache2-mod-geoip
+        state: present
+        cache_valid_time: 8640000  # ommit cache update when chache has been updated in the last 100 days
+
+    - name: "copy: configure geoip apache module"
+      copy:
+        dest: "/etc/apache2/mods-available/geoip.conf"
+        content: |
+          <IfModule mod_geoip.c>
+            GeoIPEnable On
+            GeoIPDBFile /usr/share/GeoIP/GeoIP.dat
+            GeoIPDBFile /usr/share/GeoIP/GeoIPv6.dat
+          </IfModule>
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart_apache2
+
+    - name: "file: enable apache modules"
+      file:
+        src: "../mods-available/{{ item }}"
+        dest: "/etc/apache2/mods-enabled/{{ item }}"
+        owner: root
+        group: root
+        state: link
+      notify: restart_apache2
+      with_items:
+        - geoip.conf
+        - geoip.load
+        - headers.load
+        - md.load
+        - rewrite.load
+        - ssl.load
+
+    - name: "file: disable default apache site config"
+      file:
+        path: /etc/apache2/sites-enabled/000-default.conf
+        state: absent
+      notify: reload_apache2
+
+    - name: "file: make sure fdroid.link web root directory exists"
+      file:
+        path: /srv/www/fdroid.link
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: 0755
+      notify: reload_apache2
+
+    - name: "copy: deploy apache site config for fdroid.link.conf"
+      template:
+        src: fdroid.link.conf
+        dest: /etc/apache2/sites-available/fdroid.link.conf
+        owner: root
+        group: root
+        mode: 0644
+      notify: reload_apache2
+
+    - name: "file: enable apache config fdroid.link.conf"
+      file:
+        src: /etc/apache2/sites-available/fdroid.link.conf
+        dest: /etc/apache2/sites-enabled/fdroid.link.conf
+        owner: root
+        group: root
+        state: link
+      notify: reload_apache2
+
+  handlers:
+  - name: restart_apache2
+    systemd:
+      name: apache2.service
+      state: restarted
+  - name: reload_apache2
+    systemd:
+      name: apache2.service
+      state: reloaded
