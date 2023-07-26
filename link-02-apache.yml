@@ -48,7 +48,7 @@
         state: absent
       notify: reload_apache2
 
-    - name: "file: setup fdroid link"
+    - name: "file: make sure fdroid.link web root directory exists"
       file:
         path: /srv/www/fdroid.link
         state: directory
@@ -57,37 +57,16 @@
         mode: 0755
       notify: reload_apache2
 
-    - name: "copy: setup apache site config for fdroid.link"
-      copy:
+    - name: "copy: deploy apache site config for fdroid.link.conf"
+      template:
+        src: fdroid.link.conf
         dest: /etc/apache2/sites-available/fdroid.link.conf
-        content: |
-          MDomain fdroid.link
-          MDContactEmail webmaster@h4x.at
-          MDCertificateAgreement accepted
-          DirectoryIndex index.html
-
-          <Directory "/srv/www/fdroid.link">
-            Require all granted
-          </Directory>
-
-          <VirtualHost *:80>
-            ServerName fdroid.link
-            ServerAlias fdroid.link
-            Redirect permanent / https://fdroid.link/
-          </VirtualHost>
-
-          <VirtualHost *:443>
-            ServerName fdroid.link
-            ServerAlias fdroid.link
-            SSLEngine on
-            DocumentRoot /srv/www/fdroid.link
-          </VirtualHost>
         owner: root
         group: root
         mode: 0644
       notify: reload_apache2
 
-    - name: "file: enable fdroid.link apache config"
+    - name: "file: enable apache config fdroid.link.conf"
       file:
         src: /etc/apache2/sites-available/fdroid.link.conf
         dest: /etc/apache2/sites-enabled/fdroid.link.conf
