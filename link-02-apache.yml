@@ -42,6 +42,24 @@
         state: link
       notify: restart_apache2
 
+    - name: "file: enable apache module: headers"
+      file:
+        src: "../mods-available/headers.load"
+        dest: /etc/apache2/mods-enabled/headers.load
+        owner: root
+        group: root
+        state: link
+      notify: restart_apache2
+
+    - name: "file: enable apache module: rewrite"
+      file:
+        src: "../mods-available/rewrite.load"
+        dest: /etc/apache2/mods-enabled/rewrite.load
+        owner: root
+        group: root
+        state: link
+      notify: restart_apache2
+
     - name: "file: disable default apache site config"
       file:
         path: /etc/apache2/sites-enabled/000-default.conf
