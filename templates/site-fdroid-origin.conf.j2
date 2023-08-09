@@ -1,0 +1,44 @@
+# This configuration is based on a custom mod_md setup merged with mozilla
+# config generator suggestions for for supporting "old" clients
+# https://ssl-config.mozilla.org/#server=apache&version=2.4.57&config=old&openssl=3.0.9&guideline=5.7
+# ssl settings last updated on 2023-07-26
+
+MDomain 38d069037907c3da04299e32141dc016f1fe6389.h4x.at
+MDContactEmail webmaster@h4x.at
+MDCertificateAgreement accepted
+DirectoryIndex index.html
+
+# LogFormat "0.0.0.0 - %u %{[%d/%b/%Y:00:00:00 %z]}t \"%r\" %>s %b \"%{Referer}i\" \"-\" %{GEOIP_COUNTRY_CODE}e" privacy+geo
+# CustomLog ${APACHE_LOG_DIR}/access.log privacy+geo
+
+SSLProtocol             all -SSLv3 -TLSv1 -TLSv1.1 -TLSv1.2
+SSLHonorCipherOrder     off
+SSLSessionTickets       off
+
+SSLUseStapling On
+SSLStaplingCache "shmcb:logs/ssl_stapling(32768)"
+
+<Directory "/srv/www/fdroid.link">
+  Require all granted
+</Directory>
+
+<VirtualHost *:80>
+  ServerName 38d069037907c3da04299e32141dc016f1fe6389.h4x.at
+  ServerAlias 38d069037907c3da04299e32141dc016f1fe6389.h4x.at
+
+  RewriteEngine On
+  RewriteCond %{REQUEST_URI} !^/\.well\-known/acme\-challenge/
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}$1 [R=301,L]
+</VirtualHost>
+
+<VirtualHost *:443>
+  ServerName 38d069037907c3da04299e32141dc016f1fe6389.h4x.at
+  ServerAlias 38d069037907c3da04299e32141dc016f1fe6389.h4x.at
+
+  Protocols h2 http/1.1
+
+  SSLEngine on
+  Header always set Strict-Transport-Security "max-age=63072000"
+
+  DocumentRoot /var/www/fdroid
+</VirtualHost>
