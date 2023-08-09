@@ -3,7 +3,7 @@
 # https://ssl-config.mozilla.org/#server=apache&version=2.4.57&config=old&openssl=3.0.9&guideline=5.7
 # ssl settings last updated on 2023-07-26
 
-MDomain 38d069037907c3da04299e32141dc016f1fe6389.h4x.at
+MDomain {{ new_origin_server }}
 MDContactEmail webmaster@h4x.at
 MDCertificateAgreement accepted
 DirectoryIndex index.html
@@ -23,8 +23,8 @@ SSLStaplingCache "shmcb:logs/ssl_stapling(32768)"
 </Directory>
 
 <VirtualHost *:80>
-  ServerName 38d069037907c3da04299e32141dc016f1fe6389.h4x.at
-  ServerAlias 38d069037907c3da04299e32141dc016f1fe6389.h4x.at
+  ServerName {{ new_origin_server }}
+  ServerAlias {{ new_origin_server }}
 
   RewriteEngine On
   RewriteCond %{REQUEST_URI} !^/\.well\-known/acme\-challenge/
@@ -32,8 +32,8 @@ SSLStaplingCache "shmcb:logs/ssl_stapling(32768)"
 </VirtualHost>
 
 <VirtualHost *:443>
-  ServerName 38d069037907c3da04299e32141dc016f1fe6389.h4x.at
-  ServerAlias 38d069037907c3da04299e32141dc016f1fe6389.h4x.at
+  ServerName {{ new_origin_server }}
+  ServerAlias {{ new_origin_server }}
 
   Protocols h2 http/1.1
 
