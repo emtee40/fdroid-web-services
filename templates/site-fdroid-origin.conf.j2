@@ -1,11 +1,8 @@
 # This configuration is based on a custom mod_md setup merged with mozilla
-# config generator suggestions for for supporting "old" clients
-# https://ssl-config.mozilla.org/#server=apache&version=2.4.57&config=old&openssl=3.0.9&guideline=5.7
-# ssl settings last updated on 2023-07-26
+# config generator suggestions for for supporting "modern" clients
+# https://ssl-config.mozilla.org/#server=apache&version=2.4.57&config=modern&openssl=3.0.9&guideline=5.7
+# ssl settings last updated on 2023-08-31
 
-MDomain {{ new_origin_server }}
-MDContactEmail webmaster@h4x.at
-MDCertificateAgreement accepted
 DirectoryIndex index.html
 
 # LogFormat "0.0.0.0 - %u %{[%d/%b/%Y:00:00:00 %z]}t \"%r\" %>s %b \"%{Referer}i\" \"-\" %{GEOIP_COUNTRY_CODE}e" privacy+geo
@@ -18,27 +15,30 @@ SSLSessionTickets       off
 SSLUseStapling On
 SSLStaplingCache "shmcb:logs/ssl_stapling(32768)"
 
-<Directory "/srv/www/fdroid.link">
-  Require all granted
-</Directory>
-
-<VirtualHost *:80>
-  ServerName {{ new_origin_server }}
-  ServerAlias {{ new_origin_server }}
-
-  RewriteEngine On
-  RewriteCond %{REQUEST_URI} !^/\.well\-known/acme\-challenge/
-  RewriteRule ^(.*)$ https://%{HTTP_HOST}$1 [R=301,L]
-</VirtualHost>
-
-<VirtualHost *:443>
+<VirtualHost {{ new_origin_server }}:443>
   ServerName {{ new_origin_server }}
   ServerAlias {{ new_origin_server }}
 
   Protocols h2 http/1.1
 
   SSLEngine on
+  SSLCertificateFile      /etc/ssl/certs/origin.pem
+  SSLCertificateKeyFile   /etc/ssl/private/origin.key.pem
   Header always set Strict-Transport-Security "max-age=63072000"
 
   DocumentRoot /var/www/fdroid
+</VirtualHost>
+
+
+<VirtualHost *:443>
+  ServerName localhost
+
+  Protocols h2 http/1.1
+
+  SSLEngine on
+  SSLCertificateFile      /etc/ssl/certs/snakeoil.pem
+  SSLCertificateKeyFile   /etc/ssl/private/snakeoil.key.pem
+  Header always set Strict-Transport-Security "max-age=63072000"
+
+  DocumentRoot /var/www/html
 </VirtualHost>

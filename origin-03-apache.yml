@@ -35,7 +35,6 @@
         - cache_disk.load
         - headers.load
         - include.load
-        - md.load
         - proxy.conf
         - proxy.load
         - proxy_http.load
