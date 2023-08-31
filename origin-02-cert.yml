@@ -1,0 +1,58 @@
+---
+- name: "basic firewall setup"
+  hosts:
+    - origin
+
+  tasks:
+
+    - assert:
+        that: "{{ item }}"
+      with_items:
+        - ansible_distribution == 'Debian'
+        - ansible_distribution_release == 'bookworm'
+
+    - name: install apt dependency
+      apt:
+        install_recommends: no
+        update_cache: yes
+        name:
+          - python3-cryptography
+        state: present
+        cache_valid_time: 8640000
+
+    ##
+    # generate snakeoil certificate
+    #
+
+    - name: generate snakeoil private key
+      community.crypto.openssl_privatekey:
+        path: "/etc/ssl/private/snakeoil.key.pem"
+
+    - name: create self-signed snakeoil certificate
+      community.crypto.x509_certificate:
+        path: /etc/ssl/certs/snakeoil.pem
+        privatekey_path: /etc/ssl/private/snakeoil.key.pem
+        ownca_not_after: "+1d"
+        provider: selfsigned
+
+    ##
+    # generate origin certificate
+    #
+
+    - name: generate origin private key
+      community.crypto.openssl_privatekey:
+        path: "/etc/ssl/private/origin.key.pem"
+
+    - name: create origin csr
+      community.crypto.openssl_csr_pipe:
+        privatekey_path: "/etc/ssl/private/origin.key.pem"
+        common_name: "{{ new_origin_server }}"
+      register: csr
+
+    - name: create selfsigned origin certificate
+      community.crypto.x509_certificate:
+        path: /etc/ssl/certs/origin.pem
+        privatekey_path: /etc/ssl/private/origin.key.pem
+        csr_content: "{{ csr.csr }}"
+        ownca_not_after: "2222-12-31"
+        provider: selfsigned
