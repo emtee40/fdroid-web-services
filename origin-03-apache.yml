@@ -35,7 +35,6 @@
         - cache_disk.load
         - headers.load
         - include.load
-        - md.load
         - proxy.conf
         - proxy.load
         - proxy_http.load
@@ -76,6 +75,13 @@
         group: root
         state: link
       notify: reload_apache2
+
+    - name: "file: create webroot folder"
+      file:
+        dest: /var/www/fdroid
+        owner: fdroid
+        group: fdroid
+        mode: 0755
 
   handlers:
   - name: restart_apache2

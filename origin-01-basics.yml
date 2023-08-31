@@ -84,6 +84,28 @@
         # unique: yes
       with_list: "{{ authorized_keys }}"
 
+    - name: "setup fdroid user"
+      ansible.builtin.user:
+        name: fdroid
+        password_lock: true
+        home: /home/fdroid
+
+    - name: "configure authorized keys for fdroid user"
+      authorized_key:
+        user: fdroid
+        key: "{{ item }}"
+        state: present
+      with_list:
+        - "{{ authorized_key_deployserver }}"
+        - "{{ authorized_key_buildserver }}"
+
+    - name: "configure file permissions of /home/fdroid"
+      file:
+        dest: /home/fdroid
+        owner: root
+        group: fdroid
+        mode: "ug+rX,u+w,o-rwx"
+
     ##
     # firewall
     #
@@ -99,7 +121,6 @@
             -A INPUT -i lo -j ACCEPT
             -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
             -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
-            -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
             -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
             -A INPUT -p icmp --icmp-type 8 -j ACCEPT
             COMMIT
@@ -115,7 +136,6 @@
             -A INPUT -i lo -j ACCEPT
             -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
             -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
-            -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
             -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
             -A INPUT -p icmpv6 -j ACCEPT
             COMMIT
