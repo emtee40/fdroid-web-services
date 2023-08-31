@@ -84,6 +84,28 @@
         # unique: yes
       with_list: "{{ authorized_keys }}"
 
+    - name: "setup fdroid user"
+      ansible.builtin.user:
+        name: fdroid
+        password_lock: true
+        home: /home/fdroid
+
+    - name: "configure authorized keys for fdroid user"
+      authorized_key:
+        user: fdroid
+        key: "{{ item }}"
+        state: present
+      with_list:
+        - "{{ authorized_key_deployserver }}"
+        - "{{ authorized_key_buildserver }}"
+
+    - name: "configure file permissions of /home/fdroid"
+      file:
+        dest: /home/fdroid
+        owner: root
+        group: fdroid
+        mode: "ug+rX,u+w,o-rwx"
+
     ##
     # firewall
     #
