@@ -46,6 +46,8 @@
         install_recommends: no
         state: present
         name:
+          - rsyslog
+          - rsyslog-openssl
           - vim
     - name: setup basic vimrc
       copy:
