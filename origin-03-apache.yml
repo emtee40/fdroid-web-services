@@ -89,6 +89,7 @@
       notify: restart_apache2
       with_items:
         - security.conf
+        - serve-cgi-bin.conf
 
     - name: "file: disable default apache site config"
       file:
