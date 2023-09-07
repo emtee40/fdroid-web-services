@@ -66,6 +66,7 @@
         - directory-access.conf
         - localized-error-pages.conf
         - prepare-multi-lang.conf
+        - server-status-security.conf
 
     - name: "file: enable apache conf"
       file:
@@ -79,6 +80,15 @@
         - directory-access.conf
         - localized-error-pages.conf
         - prepare-multi-lang.conf
+        - server-status-security.conf
+
+    - name: "file: disable apache conf"
+      file:
+        dest: "/etc/apache2/conf-enabled/{{ item }}"
+        state: absent
+      notify: restart_apache2
+      with_items:
+        - security.conf
 
     - name: "file: disable default apache site config"
       file:
