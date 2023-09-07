@@ -32,6 +32,7 @@
         install_recommends: no
         update_cache: yes
         name:
+          - dbus  # required for hostnamectl, not preinstalled on eclips.is instances
           - iptables-persistent
           - unattended-upgrades
         state: present
