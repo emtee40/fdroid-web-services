@@ -54,6 +54,7 @@
         - md.load
         - rewrite.load
         - ssl.load
+        - socache_shmcb.load
 
     - name: "file: disable default apache site config"
       file:
