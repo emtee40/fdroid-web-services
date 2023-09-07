@@ -91,6 +91,12 @@
         - security.conf
         - serve-cgi-bin.conf
 
+    - name: "replace: make Apache stop listening on port 80"
+      replace:
+        dest: /etc/apache2/ports.conf
+        regexp: '^ *Listen 80$'
+        replace: '#Listen 80'
+
     - name: "file: disable default apache site config"
       file:
         path: /etc/apache2/sites-enabled/000-default.conf
