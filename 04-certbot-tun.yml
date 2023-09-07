@@ -15,7 +15,7 @@
         dest: "/root/tunscript.{{ item }}.sh"
         content: |
           #! /bin/bash
-          
+
           ssh -v -N \
             -oPasswordAuthentication=no \
             -oIdentitiesOnly=yes \
@@ -65,5 +65,5 @@
     - systemd:
         state: started
         enabled: yes
-        service: "certbot-acme-tun-{{ item }}.service" 
+        service: "certbot-acme-tun-{{ item }}.service"
       loop: "{{ groups['endpoints'] }}"

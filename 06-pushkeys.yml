@@ -17,7 +17,7 @@
         content: |
           #! /bin/bash
           # copy keys to endpoint instances
-          
+
           {% for endpoint_host in groups['endpoints'] %}
           scp -B \
             -i /root/.ssh/id_ssh_rsa_pushkey \

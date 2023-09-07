@@ -134,11 +134,11 @@
         mode: 0755
 
   handlers:
-  - name: restart_apache2
-    systemd:
-      name: apache2.service
-      state: restarted
-  - name: reload_apache2
-    systemd:
-      name: apache2.service
-      state: reloaded
+    - name: restart_apache2
+      systemd:
+        name: apache2.service
+        state: restarted
+    - name: reload_apache2
+      systemd:
+        name: apache2.service
+        state: reloaded

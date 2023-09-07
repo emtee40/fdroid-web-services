@@ -64,16 +64,16 @@
 
     - name: "sshd - require public key authentication, disallow password auth"
       lineinfile:
-          path: '/etc/ssh/sshd_config'
-          regexp: '^[\s#]*PasswordAuthentication .*'
-          line: 'PasswordAuthentication no'
+        path: '/etc/ssh/sshd_config'
+        regexp: '^[\s#]*PasswordAuthentication .*'
+        line: 'PasswordAuthentication no'
       notify: reload_sshd
 
     - name: "sshd - require public key authentication, disallow password auth"
       lineinfile:
-          path: '/etc/ssh/sshd_config'
-          regexp: '^[\s#]*PermitRootLogin .*'
-          line: 'PermitRootLogin prohibit-password'
+        path: '/etc/ssh/sshd_config'
+        regexp: '^[\s#]*PermitRootLogin .*'
+        line: 'PermitRootLogin prohibit-password'
       notify: reload_sshd
 
     ##
@@ -114,11 +114,11 @@
       notify: reload_iptables
 
   handlers:
-  - name: reload_iptables
-    systemd:
-      name: netfilter-persistent.service
-      state: restarted
-  - name: reload_sshd
-    systemd:
-      name: sshd.service
-      state: reloaded
+    - name: reload_iptables
+      systemd:
+        name: netfilter-persistent.service
+        state: restarted
+    - name: reload_sshd
+      systemd:
+        name: sshd.service
+        state: reloaded
