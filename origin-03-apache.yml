@@ -30,16 +30,9 @@
         state: link
       notify: restart_apache2
       with_items:
-        - cache.load
-        - cache_disk.conf
-        - cache_disk.load
         - headers.load
-        - include.load
         - negotiation.conf
         - negotiation.load
-        - proxy.conf
-        - proxy.load
-        - proxy_http.load
         - rewrite.load
         - ssl.load
         - socache_shmcb.load
@@ -50,9 +43,15 @@
         state: absent
       notify: restart_apache2
       with_items:
-        # not sure why we want this disabled, but let's mimic the legacy setup for now
         - autoindex.conf
         - autoindex.load
+        - cache.load
+        - cache_disk.conf
+        - cache_disk.load
+        - include.load
+        - proxy.conf
+        - proxy.load
+        - proxy_http.load
 
     - name: "copy: Apache directory access conf"
       copy:
