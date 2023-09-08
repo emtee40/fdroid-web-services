@@ -15,6 +15,21 @@ SSLSessionTickets       off
 SSLUseStapling On
 SSLStaplingCache "shmcb:logs/ssl_stapling(32768)"
 
+ServerName localhost
+
+<VirtualHost {{ new_origin_server_ip }}:443>
+  ServerName {{ new_origin_server_ip }}
+
+  Protocols h2 http/1.1
+
+  SSLEngine on
+  SSLCertificateFile      /etc/ssl/certs/snakeoil.pem
+  SSLCertificateKeyFile   /etc/ssl/private/snakeoil.key.pem
+  Header always set Strict-Transport-Security "max-age=63072000"
+
+  DocumentRoot /var/www/html
+</VirtualHost>
+
 <VirtualHost {{ new_origin_server }}:443>
   ServerName {{ new_origin_server }}
   ServerAlias {{ new_origin_server }}
@@ -27,18 +42,50 @@ SSLStaplingCache "shmcb:logs/ssl_stapling(32768)"
   Header always set Strict-Transport-Security "max-age=63072000"
 
   DocumentRoot /var/www/fdroid
-</VirtualHost>
 
+  <Files *.html>
+    SetHandler type-map
+  </Files>
 
-<VirtualHost *:443>
-  ServerName localhost
+  # Virtualize the language sub"directories"
+  AliasMatch ^(?:/(?:ach|af|ak|am|an|anp|ar|ar_DZ|ar_MA|arn|as|ast|ay|az|ba|bar|be|be_Latn|bg|bn|bn_BD|bn_IN|bo|br|brx|bs|bs_Cyrl|bs_Latn|ca|ca@valencia|cgg|ch|chr|ckb|cr|cs|csb|cy|da|de|de_AT|de_CH|doi|dz|el|en|en_AU|en_CA|en_GB|en_IE|en_PH|en_US|en_ZA|eo|es|es_AR|es_MX|es_PR|es_US|et|eu|fa|ff|fi|fil|fo|fr|fr_CA|frp|fur|fy|ga|gd|gl|gu|gun|ha|haw|he|hi|hne|hr|hsb|ht|hu|hy|ia|id|ig|is|it|ja|jbo|jv|ka|kab|kk|kl|km|kn|ko|kok|ks|ksh|ku|kw|ky|la|lb|li|ln|lo|lt|lv|mai|me|mfe|mg|mi|mk|ml|mn|mni|mnk|mr|ms|mt|my|nah|nap|nb|nb_NO|nds|ne|nl|nl_BE|nn|no|nqo|nso|ny|oc|oj|or|os|pa|pap|pl|pms|pr|ps|pt|pt_BR|pt_PT|rm|ro|ru|rw|sa|sah|sat|sc|sco|sd|se|sh|si|sk|sl|sn|so|son|sq|sr|sr_Cyrl|sr_Latn|st|su|sv|sw|szl|ta|te|tg|th|ti|tk|tl|tlh|tlh-qaak|tr|ts|tt|ug|uk|ur|ur_PK|uz|uz_Latn|ve|vec|vi|vls|wa|wo|yi|yo|yue|zh|zh_Hans|zh_Hant|zh_HK|zu)/)?(.*)?$ /var/www/fdroid/$1
 
-  Protocols h2 http/1.1
+  # Tell mod_negotiation which language to prefer
+  SetEnvIf Request_URI ^/(ach|af|ak|am|an|anp|ar|arn|as|ast|ay|az|ba|bar|be|bg|bn|bo|br|brx|bs|ca|ca@valencia|cgg|ch|chr|ckb|cr|cs|csb|cy|da|de|doi|dz|el|en|eo|es|et|eu|fa|ff|fi|fil|fo|fr|frp|fur|fy|ga|gd|gl|gu|gun|ha|haw|he|hi|hne|hr|hsb|ht|hu|hy|ia|id|ig|is|it|ja|jbo|jv|ka|kab|kk|kl|km|kn|ko|kok|ks|ksh|ku|kw|ky|la|lb|li|ln|lo|lt|lv|mai|me|mfe|mg|mi|mk|ml|mn|mni|mnk|mr|ms|mt|my|nah|nap|nb|nds|ne|nl|nn|no|nqo|nso|ny|oc|oj|or|os|pa|pap|pl|pms|pr|ps|pt|rm|ro|ru|rw|sa|sah|sat|sc|sco|sd|se|sh|si|sk|sl|sn|so|son|sq|sr|st|su|sv|sw|szl|ta|te|tg|th|ti|tk|tl|tlh|tlh-qaak|tr|ts|tt|ug|uk|ur|uz|ve|vec|vi|vls|wa|wo|yi|yo|yue|zh|zu)/ prefer-language=$1
 
-  SSLEngine on
-  SSLCertificateFile      /etc/ssl/certs/snakeoil.pem
-  SSLCertificateKeyFile   /etc/ssl/private/snakeoil.key.pem
-  Header always set Strict-Transport-Security "max-age=63072000"
+  # Language codes from Weblate containing capital letters and underscores need to be treated
+  # differently, namely the language they refer to is lower case with a hyphen
+  SetEnvIf Request_URI ^/zh_HK/ prefer-language=zh-hk
+  SetEnvIf Request_URI ^/zh_Hant/ prefer-language=zh-hant
+  SetEnvIf Request_URI ^/zh_Hans/ prefer-language=zh-hans
+  SetEnvIf Request_URI ^/uz_Latn/ prefer-language=uz-latn
+  SetEnvIf Request_URI ^/ur_PK/ prefer-language=ur-pk
+  SetEnvIf Request_URI ^/sr_Latn/ prefer-language=sr-latn
+  SetEnvIf Request_URI ^/sr_Cyrl/ prefer-language=sr-cyrl
+  SetEnvIf Request_URI ^/pt_PT/ prefer-language=pt-pt
+  SetEnvIf Request_URI ^/pt_BR/ prefer-language=pt-br
+  SetEnvIf Request_URI ^/nl_BE/ prefer-language=nl-be
+  SetEnvIf Request_URI ^/nb_NO/ prefer-language=nb-no
+  SetEnvIf Request_URI ^/fr_CA/ prefer-language=fr-ca
+  SetEnvIf Request_URI ^/es_US/ prefer-language=es-us
+  SetEnvIf Request_URI ^/es_PR/ prefer-language=es-pr
+  SetEnvIf Request_URI ^/es_MX/ prefer-language=es-mx
+  SetEnvIf Request_URI ^/es_AR/ prefer-language=es-ar
+  SetEnvIf Request_URI ^/en_ZA/ prefer-language=en-za
+  SetEnvIf Request_URI ^/en_US/ prefer-language=en-us
+  SetEnvIf Request_URI ^/en_PH/ prefer-language=en-ph
+  SetEnvIf Request_URI ^/en_IE/ prefer-language=en-ie
+  SetEnvIf Request_URI ^/en_GB/ prefer-language=en-gb
+  SetEnvIf Request_URI ^/en_CA/ prefer-language=en-ca
+  SetEnvIf Request_URI ^/en_AU/ prefer-language=en-au
+  SetEnvIf Request_URI ^/de_CH/ prefer-language=de-ch
+  SetEnvIf Request_URI ^/de_AT/ prefer-language=de-at
+  SetEnvIf Request_URI ^/bs_Latn/ prefer-language=bs-latn
+  SetEnvIf Request_URI ^/bs_Cyrl/ prefer-language=bs-cyrl
+  SetEnvIf Request_URI ^/bn_IN/ prefer-language=bn-in
+  SetEnvIf Request_URI ^/bn_BD/ prefer-language=bn-bd
+  SetEnvIf Request_URI ^/be_Latn/ prefer-language=be-latn
+  SetEnvIf Request_URI ^/ar_MA/ prefer-language=ar-ma
+  SetEnvIf Request_URI ^/ar_DZ/ prefer-language=ar-dz
 
-  DocumentRoot /var/www/html
 </VirtualHost>

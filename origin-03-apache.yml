@@ -64,7 +64,6 @@
       with_items:
         - directory-access.conf
         - localized-error-pages.conf
-        - prepare-multi-lang.conf
         - server-status-security.conf
 
     - name: "file: enable apache conf"
@@ -78,7 +77,6 @@
       with_items:
         - directory-access.conf
         - localized-error-pages.conf
-        - prepare-multi-lang.conf
         - server-status-security.conf
 
     - name: "file: disable apache conf"
@@ -90,11 +88,19 @@
         - security.conf
         - serve-cgi-bin.conf
 
-    - name: "replace: make Apache stop listening on port 80"
-      replace:
+    - name: "copy: make Apache stop listening on port 80"
+      copy:
         dest: /etc/apache2/ports.conf
-        regexp: '^ *Listen 80$'
-        replace: '#Listen 80'
+        content: |
+          #Listen 80
+          <IfModule ssl_module>
+            Listen {{ new_origin_server_ip }}:443
+          </IfModule>
+          <IfModule mod_gnutls.c>
+            Listen {{ new_origin_server_ip }}:443
+          </IfModule>
+        owner: root
+        mode: 0644
 
     - name: "file: disable default apache site config"
       file:
