@@ -55,4 +55,8 @@ server {
         proxy_pass {{ origin_server }}/repo;
     }
 
+    # stopgap measure for take-down: https://gitlab.com/fdroid/admin/-/issues/428
+    location ~ .*/packages/(com\.jparkie\.aizoban|eu\.kanade\.tachiyomi|org\.nv95\.openmanga)/$ {
+        return 404;
+    }
 }
