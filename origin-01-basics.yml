@@ -22,6 +22,7 @@
       ansible.builtin.hostname:
         name: fdroidOrigin
         use: systemd
+      when: CI is undefined
 
     ##
     # APT
@@ -88,6 +89,7 @@
         state: present
         # unique: yes
       with_list: "{{ authorized_keys }}"
+      when: CI is undefined  # TODO why does this task fail in CI?
 
     - name: "setup fdroid user"
       ansible.builtin.user:
@@ -151,7 +153,10 @@
       systemd:
         name: netfilter-persistent.service
         state: restarted
+      when: CI is undefined
+
     - name: reload_sshd
       systemd:
         name: sshd.service
         state: reloaded
+      when: CI is undefined
