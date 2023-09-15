@@ -36,7 +36,6 @@
         update_cache: yes
         name:
           - iptables-persistent
-          - unattended-upgrades
         state: present
         cache_valid_time: 8640000  # ommit cache update when chache has been updated in the last 100 days
 
@@ -79,6 +78,10 @@
         path: "{{ item.path }}"
         state: absent
       with_items: "{{ rouge_apt_source_list_files['files'] }}"
+
+    - name: "include_role: set up unattended-upgrades"
+      include_role:
+        name: unattended_upgrades
 
     ##
     # install and configure some basic tools

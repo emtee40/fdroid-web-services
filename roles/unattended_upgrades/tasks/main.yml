@@ -1,0 +1,19 @@
+---
+
+- name: "apt: install unattended-upgrades"
+  apt:
+    install_recommends: no
+    update_cache: yes
+    name:
+      - unattended-upgrades
+
+- name: "copy: enable unattended-upgrades"
+  copy:
+    content: |
+      APT::Periodic::Download-Upgradeable-Packages "1";
+      APT::Periodic::Unattended-Upgrade "1";
+      APT::Periodic::Update-Package-Lists "1";
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    mode: 0644
+    owner: root
+    group: root
