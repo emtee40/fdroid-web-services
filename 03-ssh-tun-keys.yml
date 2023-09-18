@@ -53,7 +53,7 @@
         dest: ".cache/{{ inventory_hostname }}.ssh_host_rsa_key.pub"
         flat: yes
       when: inventory_hostname in groups['endpoints']
-    
+
     - file:
         path: /root/.ssh
         state: directory
@@ -61,7 +61,7 @@
         group: root
         mode: 0700
       when: inventory_hostname in groups['certmachine']
-      
+
     - name: deploy all hostkeys to known_hosts on certmachine
       known_hosts:
         path: /root/.ssh/known_hosts
