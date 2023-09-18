@@ -33,7 +33,7 @@ before_script:
 ansible-playbook-syntax-check:
   script:
     - *ansible-template
-    - ansible-playbook --syntax-check *0*.yml
+    - tools/lint-ansible-syntax-check
 
 yamllint:
   only:
@@ -42,4 +42,4 @@ yamllint:
       - "*.yml"
   script:
     - apt-get install yamllint
-    - yamllint .*.yml *.yml
+    - tools/lint-yamllint

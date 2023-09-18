@@ -1,0 +1,10 @@
+#! /bin/bash
+
+set -euo pipefail
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd "${SCRIPT_DIR}/.."
+
+find -maxdepth 1 -name '*.yml' \
+    | egrep -v '(\.gitlab-ci\.yml|hosts\.yml)' \
+    | xargs ansible-playbook --syntax-check
