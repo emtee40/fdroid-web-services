@@ -1,6 +1,10 @@
 ---
 image: debian:bookworm-slim
 
+stages:
+  - lint
+  - test
+
 before_script:
   - export LC_ALL=C.UTF-8
   - export DEBIAN_FRONTEND=noninteractive
@@ -30,12 +34,28 @@ before_script:
 
 # jobs ------------------------------------------------------------------------#
 
+ansible-lint:
+  stage: lint
+  script:
+    - *ansible-template
+    # TODO these are disabled until someone fixes it
+    - ansible-lint --exclude=.galaxy --skip-list experimental,fqcn,name origin-04-mirror-push.yml
+
 ansible-playbook-syntax-check:
+  stage: lint
   script:
     - *ansible-template
     - tools/lint-ansible-syntax-check
 
+shellcheck:
+  stage: lint
+  script:
+    - apt-get install shellcheck
+    - shellcheck files/push-to-mirror.sh
+
+
 yamllint:
+  stage: lint
   only:
     changes:
       - ".*.yml"
@@ -43,3 +63,33 @@ yamllint:
   script:
     - apt-get install yamllint
     - tools/lint-yamllint
+
+
+# The ansible setup assumes sshd is already there, since that it how
+# it connects to the server that it configures. So it has to be
+# explicitly installed here in this job.
+test origin:
+  stage: test
+  script:
+    - *ansible-template
+    - apt-get install openssh-server sudo shellcheck
+    - sed -i 's,fdroidOrigin,localhost,g' hosts.yml
+    - ansible-playbook
+        --connection local
+        --limit localhost
+        --extra-vars "CI=$CI"
+        --verbose
+        origin-01-basics.yml
+    - ansible-playbook
+        --connection local
+        --limit localhost
+        --extra-vars "CI=$CI"
+        --verbose
+        origin-04-mirror-push.yml
+
+    # run SSH extended test mode https://www.simplified.guide/ssh/test-config
+    - test -d /run/sshd || mkdir /run/sshd
+    - /usr/sbin/sshd -t
+
+    # check syntax of generated scripts, skip system provided apt-compat
+    - shellcheck $(ls -1 /etc/cron.*ly/* | grep -v apt-compat)
