@@ -6,5 +6,5 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd "${SCRIPT_DIR}/.."
 
 find -maxdepth 1 -name '*.yml' \
-    | egrep -v '(\.gitlab-ci\.yml|hosts\.yml)' \
+    | egrep -v '(\.gitlab-ci\.yml|hosts\.yml|requirements\.yml)' \
     | xargs ansible-playbook --syntax-check

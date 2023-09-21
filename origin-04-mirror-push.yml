@@ -20,6 +20,13 @@
           - openssh-client
           - rsync
 
+    - name: "include_role: lockdown fdroid user"
+      include_role:
+        name: lockdown_user
+      vars:
+        user: fdroid
+        userhome: /home/fdroid
+
     - name: "file: create /var/www"
       file:
         path: /var/www
@@ -44,24 +51,6 @@
         owner: root
         group: root
 
-    - name: "file: configure file permissions of /home/fdroid/.ssh"
-      file:
-        path: /home/fdroid/.ssh
-        state: directory
-        owner: root
-        group: fdroid
-        mode: 0750
-
-    - name: "file: configure file permissions of /home/fdroid/.ssh/authorized_keys"
-      file:
-        path: /home/fdroid/.ssh/authorized_keys
-        state: touch
-        modification_time: preserve
-        access_time: preserve
-        owner: root
-        group: fdroid
-        mode: 0640
-
     - name: "copy: ssh_known_hosts for push mirror servers"
       copy:
         src: ssh_known_hosts
@@ -77,8 +66,8 @@
         group: root
         mode: 0644
         content: |
-          */10 * * * *  fdroid  /home/fdroid/push-to-mirror.sh repo    ftp-push.lysator.liu.se
-          0 0 * * *     fdroid  /home/fdroid/push-to-mirror.sh archive ftp-push.lysator.liu.se
+          */10 * * * *  fdroid  /home/fdroid/push-to-mirror.sh repo    ftp-push.lysator.liu.se > /tmp/ftp-push.lysator.liu.se_repo.log 2>&1
+          0 0 * * *     fdroid  /home/fdroid/push-to-mirror.sh archive ftp-push.lysator.liu.se > /tmp/ftp-push.lysator.liu.se_archive.log 2>&1
 
     - name: "copy: cronjob to push to plug-mirror.rcac.purdue.edu"
       copy:
@@ -87,8 +76,8 @@
         group: root
         mode: 0644
         content: |
-          */10 * * * *  fdroid  /home/fdroid/push-to-mirror.sh repo    plug-mirror.rcac.purdue.edu
-          4 0 * * *     fdroid  /home/fdroid/push-to-mirror.sh archive plug-mirror.rcac.purdue.edu
+          */10 * * * *  fdroid  /home/fdroid/push-to-mirror.sh repo    plug-mirror.rcac.purdue.edu > /tmp/plug-mirror.rcac.purdue.edu_repo.log 2>&1
+          4 0 * * *     fdroid  /home/fdroid/push-to-mirror.sh archive plug-mirror.rcac.purdue.edu > /tmp/plug-mirror.rcac.purdue.edu_archive.log 2>&1
 
     - name: "copy: cronjob to push to ftp.agdsn.de"
       copy:
@@ -97,5 +86,5 @@
         group: root
         mode: 0644
         content: |
-          */10 * * * *  fdroid  /home/fdroid/push-to-mirror.sh repo    ftp.agdsn.de
-          8 0 * * *     fdroid  /home/fdroid/push-to-mirror.sh archive ftp.agdsn.de
+          */10 * * * *  fdroid  /home/fdroid/push-to-mirror.sh repo    ftp.agdsn.de > /tmp/ftp.agdsn.de_repo.log 2>&1
+          8 0 * * *     fdroid  /home/fdroid/push-to-mirror.sh archive ftp.agdsn.de > /tmp/ftp.agdsn.de_archive.log 2>&1

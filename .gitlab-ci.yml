@@ -24,6 +24,7 @@ before_script:
   - apt-get install ansible ansible-lint git python3-apt
   # fix [WARNING]: Ansible is being run in a world writable directory
   - chmod -R go-w $CI_PROJECT_DIR
+  - ansible-galaxy install --force --role-file requirements.yml --roles-path .galaxy
   # vault won't work in CI because the password can't be decrypted
   - sed -i '/vault_password_file/d' ansible.cfg
   - rm group_vars/*/secret.yml
