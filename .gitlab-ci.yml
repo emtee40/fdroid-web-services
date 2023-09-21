@@ -87,6 +87,9 @@ test origin:
         --verbose
         origin-04-mirror-push.yml
 
+    # check cron syntax
+    - for f in /etc/cron.d/*-*; do echo "$ cat $f | crontab"; cat $f | crontab; done
+
     # run SSH extended test mode https://www.simplified.guide/ssh/test-config
     - test -d /run/sshd || mkdir /run/sshd
     - /usr/sbin/sshd -t
