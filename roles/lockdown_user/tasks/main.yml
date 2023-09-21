@@ -18,6 +18,16 @@
     group: "{{ user }}"
     mode: 0640
 
+- name: "file: configure file permissions of {{ userhome }}/.gitconfig"
+  file:
+    path: "{{ userhome }}/.gitconfig"
+    state: touch
+    modification_time: preserve
+    access_time: preserve
+    owner: root
+    group: "{{ user }}"
+    mode: 0640
+
 - name: "file: lock down {{ user }} rc files"
   file:
     path: "{{ item }}"
@@ -27,7 +37,6 @@
   with_items:
     - "{{ userhome }}/.bash_logout"
     - "{{ userhome }}/.bashrc"
-    - "{{ userhome }}/.gitconfig"
     - "{{ userhome }}/.profile"
     - "{{ userhome }}/.ssh/authorized_keys"
     - "{{ userhome }}/.ssh/"
