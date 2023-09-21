@@ -53,6 +53,14 @@ shellcheck:
     - apt-get install shellcheck
     - shellcheck files/push-to-mirror.sh
 
+jinja2 check:
+  stage: lint
+  script:
+    - apt-get install python3-jinja2
+    - for f in templates/*; do
+          set -x;
+          python3 -c "from jinja2 import Environment as E; e=E(); e.parse(open('$f').read())";
+      done
 
 yamllint:
   stage: lint
@@ -60,6 +68,9 @@ yamllint:
     changes:
       - ".*.yml"
       - "*.yml"
+      - "*/*.yml"
+      - "*/*/*.yml"
+      - "*/*/*/*.yml"
   script:
     - apt-get install yamllint
     - tools/lint-yamllint
@@ -86,6 +97,9 @@ test origin:
         --extra-vars "CI=$CI"
         --verbose
         origin-04-mirror-push.yml
+
+    # check cron syntax
+    - for f in /etc/cron.d/*-*; do echo "$ cat $f | crontab"; cat $f | crontab; done
 
     # run SSH extended test mode https://www.simplified.guide/ssh/test-config
     - test -d /run/sshd || mkdir /run/sshd
