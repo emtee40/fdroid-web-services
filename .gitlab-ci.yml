@@ -53,6 +53,14 @@ shellcheck:
     - apt-get install shellcheck
     - shellcheck files/push-to-mirror.sh
 
+jinja2 check:
+  stage: lint
+  script:
+    - apt-get install python3-jinja2
+    - for f in templates/*; do
+          set -x;
+          python3 -c "from jinja2 import Environment as E; e=E(); e.parse(open('$f').read())";
+      done
 
 yamllint:
   stage: lint
