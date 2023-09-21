@@ -26,4 +26,4 @@ test -n "$host"
           "/var/www/fdroid/${section}" \
           "fdroid@${host}:/srv/fdroid-mirror.at.or.at/htdocs/fdroid/"
 
-) 200>"/var/lock/${USER}_$(basename "$0")_${host}"
+) 200>"/run/lock/$(whoami)_$(basename "$0")_${host}"
