@@ -38,8 +38,6 @@
     - "{{ userhome }}/.bash_logout"
     - "{{ userhome }}/.bashrc"
     - "{{ userhome }}/.profile"
-    - "{{ userhome }}/.ssh/authorized_keys"
-    - "{{ userhome }}/.ssh/"
     - "{{ userhome }}/"
 
 - name: "file: make {{ userhome }}/.ansible"
