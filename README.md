@@ -1,5 +1,14 @@
-This project automates the setup arbitrary ammount reverse proxies rverse
-proxies in front of a central webserver.
+This project automates the setup arbitrary amount reverse proxies reverse
+proxies in front of a central web server known as the _originserver_.
+
+### _originserver_
+
+The _originserver_ is the server in the middle of all the web services:
+
+* Hosts all the files that are available on f-droid.org.
+* Runs Apache [`type-map`](https://httpd.apache.org/docs/current/content-negotiation.html#type-map) for automatic locale selection.
+* Receives all the repo files from the _buildserver_.
+* Pushes all the repo files to the [primary mirrors](https://f-droid.org/docs/Running_a_Mirror/).
 
 ### HTTPS
 
@@ -30,10 +39,10 @@ bullseye servers.
      |                                              /
      |
      |                                              \
-  o--------------o                                   | upstream
-  |              |                                   | web server
-  |  web-server  |                                   | (not managed
-  |              |                                   | in this proj)
+  o--------------o                                   |
+  |              |                                   | upstream
+  | originserver |                                   | web server
+  |              |                                   |
   o--------------o                                   |
                                                     /
 ```
@@ -56,10 +65,10 @@ in place.
      o--------------o---------------------o
      |
      |                                               \
-  o--------------o                                    | upstream
-  |              |                                    | web server
-  |  web-server  |                                    | (not managed
-  |              |                                    | in this proj)
+  o--------------o                                    |
+  |              |                                    | upstream
+  | originserver |                                    | web server
+  |              |                                    |
   o--------------o                                    |
                                                      /
 ```
