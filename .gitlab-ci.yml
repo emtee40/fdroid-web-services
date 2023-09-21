@@ -60,6 +60,9 @@ yamllint:
     changes:
       - ".*.yml"
       - "*.yml"
+      - "*/*.yml"
+      - "*/*/*.yml"
+      - "*/*/*/*.yml"
   script:
     - apt-get install yamllint
     - tools/lint-yamllint
