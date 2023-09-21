@@ -21,6 +21,11 @@
         state: present
         cache_valid_time: 8640000  # ommit cache update when chache has been updated in the last 100 days
 
+    - name: "lineinfile: increase number allowed simultaneously open file-descriptiors for apache2"
+      lineinfile:
+        dest: /etc/security/limits.conf
+        line: "www-data soft nofile 32768"
+
     - name: "file: enable apache modules"
       file:
         src: "../mods-available/{{ item }}"
