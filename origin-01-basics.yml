@@ -113,6 +113,10 @@
         group: fdroid
         mode: "ug+rX,u+w,o-rwx"
 
+    - name: "include_role: install secure sshd"
+      include_role:
+        name: ansible-role-secure-sshd
+
     ##
     # firewall
     #
