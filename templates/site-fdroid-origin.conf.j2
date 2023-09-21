@@ -8,7 +8,7 @@ DirectoryIndex index.html
 # LogFormat "0.0.0.0 - %u %{[%d/%b/%Y:00:00:00 %z]}t \"%r\" %>s %b \"%{Referer}i\" \"-\" %{GEOIP_COUNTRY_CODE}e" privacy+geo
 # CustomLog ${APACHE_LOG_DIR}/access.log privacy+geo
 
-SSLProtocol             all -SSLv3 -TLSv1 -TLSv1.1 -TLSv1.2
+SSLProtocol             all -SSLv3 -TLSv1 -TLSv1.1 -TLSv1.3
 SSLHonorCipherOrder     off
 SSLSessionTickets       off
 
@@ -19,8 +19,9 @@ ServerName localhost
 
 <VirtualHost {{ new_origin_server_ip }}:443>
   ServerName {{ new_origin_server_ip }}
+  ServerAlias {{ new_origin_server_ip6 }}
 
-  Protocols h2 http/1.1
+  Protocols http/1.1
 
   SSLEngine on
   SSLCertificateFile      /etc/ssl/certs/snakeoil.pem
@@ -34,7 +35,7 @@ ServerName localhost
   ServerName {{ new_origin_server }}
   ServerAlias {{ new_origin_server }}
 
-  Protocols h2 http/1.1
+  Protocols http/1.1
 
   SSLEngine on
   SSLCertificateFile      /etc/ssl/certs/origin.pem

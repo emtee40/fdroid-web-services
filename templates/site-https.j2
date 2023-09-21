@@ -38,7 +38,7 @@ server {
     }
 
     location / {
-        proxy_pass             {{ origin_server }};
+        proxy_pass             https://{{ new_origin_server }};
 
         proxy_buffering        on;
         proxy_cache            DEFAULT_ZONE;
@@ -52,11 +52,11 @@ server {
     }
 
     location /fdroid/repo {
-        proxy_pass {{ origin_server }}/repo;
+        proxy_pass https://{{ new_origin_server }}/repo;
     }
 
     location /fdroid/archive {
-        proxy_pass {{ origin_server }}/archive;
+        proxy_pass https://{{ new_origin_server }}/archive;
     }
 
     # stopgap measure for take-down: https://gitlab.com/fdroid/admin/-/issues/428
