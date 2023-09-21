@@ -20,6 +20,13 @@
           - openssh-client
           - rsync
 
+    - name: "include_role: lockdown fdroid user"
+      include_role:
+        name: lockdown_user
+      vars:
+        user: fdroid
+        userhome: /home/fdroid
+
     - name: "file: create /var/www"
       file:
         path: /var/www
@@ -43,24 +50,6 @@
         mode: 0755
         owner: root
         group: root
-
-    - name: "file: configure file permissions of /home/fdroid/.ssh"
-      file:
-        path: /home/fdroid/.ssh
-        state: directory
-        owner: root
-        group: fdroid
-        mode: 0750
-
-    - name: "file: configure file permissions of /home/fdroid/.ssh/authorized_keys"
-      file:
-        path: /home/fdroid/.ssh/authorized_keys
-        state: touch
-        modification_time: preserve
-        access_time: preserve
-        owner: root
-        group: fdroid
-        mode: 0640
 
     - name: "copy: ssh_known_hosts for push mirror servers"
       copy:

@@ -1,0 +1,105 @@
+---
+
+- name: "file: configure file permissions of {{ userhome }}/.ssh"
+  file:
+    path: "{{ userhome }}/.ssh"
+    state: directory
+    owner: root
+    group: "{{ user }}"
+    mode: 0750
+
+- name: "file: configure file permissions of {{ userhome }}/.ssh/authorized_keys"
+  file:
+    path: "{{ userhome }}/.ssh/authorized_keys"
+    state: touch
+    modification_time: preserve
+    access_time: preserve
+    owner: root
+    group: "{{ user }}"
+    mode: 0640
+
+- name: "file: lock down {{ user }} rc files"
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: a+rX,a-w
+  with_items:
+    - "{{ userhome }}/.bash_logout"
+    - "{{ userhome }}/.bashrc"
+    - "{{ userhome }}/.gitconfig"
+    - "{{ userhome }}/.profile"
+    - "{{ userhome }}/.ssh/authorized_keys"
+    - "{{ userhome }}/.ssh/"
+    - "{{ userhome }}/"
+
+- name: "file: make {{ userhome }}/.ansible"
+  file:
+    path: "{{ userhome }}/.ansible"
+    state: directory
+    mode: 0755
+    owner: "{{ user }}"
+    group: "{{ user }}"
+
+- name: "file: make {{ userhome }}/.cache"
+  file:
+    path: "{{ userhome }}/.cache"
+    state: directory
+    mode: 0755
+    owner: "{{ user }}"
+    group: "{{ user }}"
+
+- name: "file: make {{ userhome }}/.emacs.d"
+  file:
+    path: "{{ userhome }}/.emacs.d"
+    state: directory
+    mode: 0750
+    owner: root
+    group: "{{ user }}"
+
+- name: "copy: {{ userhome }}/.emacs.d/init.el"
+  copy:
+    content: |
+      ;; managed by Ansible
+      (setq column-number-mode t)
+      (setq inhibit-startup-screen t)
+      (setq user-emacs-directory-warning nil)
+      (setq visible-bell t)
+      (show-paren-mode t)
+    dest: "{{ userhome }}/.emacs.d/init.el"
+    mode: 0750
+    owner: root
+    group: "{{ user }}"
+
+- name: "alternatives: set vi as default editor"
+  alternatives:
+    name: editor
+    path: /usr/bin/vim.basic
+
+- name: "copy: set emacs as sensible-editor for {{ user }}"
+  copy:
+    content: |
+      # maintained in Ansible
+      SELECTED_EDITOR="/usr/bin/vim.basic"
+    dest: "{{ userhome }}/.selected_editor"
+    mode: 0644
+    owner: root
+    group: root
+
+- name: "copy: set emacs as sensible-editor for root"
+  copy:
+    content: |
+      # maintained in Ansible
+      SELECTED_EDITOR="/usr/bin/vim.basic"
+    dest: /root/.selected_editor
+    mode: 0600
+    owner: root
+    group: root
+
+- name: "lineinfile: set bash idle timeout auto-logout"
+  lineinfile:
+    path: /etc/profile
+    line: "{{ item }}"
+  with_items:
+    - "# https://adercon.com/posts/changing-the-auto-logout-timeout-in-ssh/"
+    - TMOUT=600
