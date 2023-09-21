@@ -5,8 +5,8 @@
 
 DirectoryIndex index.html
 
-# LogFormat "0.0.0.0 - %u %{[%d/%b/%Y:00:00:00 %z]}t \"%r\" %>s %b \"%{Referer}i\" \"-\" %{GEOIP_COUNTRY_CODE}e" privacy+geo
-# CustomLog ${APACHE_LOG_DIR}/access.log privacy+geo
+LogFormat "0.0.0.0 - %u %{[%d/%b/%Y:00:00:00 %z]}t \"%r\" %>s %b \"%{Referer}i\" \"-\" \"-\"" privacy
+CustomLog ${APACHE_LOG_DIR}/access.log privacy
 
 SSLProtocol             all -SSLv3 -TLSv1 -TLSv1.1 -TLSv1.3
 SSLHonorCipherOrder     off
