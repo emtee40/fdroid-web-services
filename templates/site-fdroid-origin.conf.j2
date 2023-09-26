@@ -44,7 +44,7 @@ ServerName localhost
 
   DocumentRoot /var/www/fdroid
 
-  <DirectoryMatch "^/var/www/fdroid/(?!repo/|archive/).*$">
+  <DirectoryMatch "^/var/www/fdroid/(?!repo/|archive/|forums/).*$">
     <Files *.html>
       SetHandler type-map
     </Files>
