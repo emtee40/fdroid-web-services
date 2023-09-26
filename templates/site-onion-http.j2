@@ -28,7 +28,7 @@ server {
   sub_filter_once off;
 
   location / {
-    proxy_pass {{ new_origin_server }};
+    proxy_pass https://{{ new_origin_server }};
 
     sub_filter "http://f-droid.org" "http://{{ onion_address }}";
     sub_filter "https://f-droid.org" "http://{{ onion_address }}";
@@ -47,10 +47,10 @@ server {
   }
 
   location /fdroid/repo {
-    proxy_pass {{ new_origin_server }}/repo;
+    proxy_pass https://{{ new_origin_server }}/repo;
   }
 
   location /fdroid/archive {
-    proxy_pass {{ new_origin_server }}/archive;
+    proxy_pass https://{{ new_origin_server }}/archive;
   }
 }
