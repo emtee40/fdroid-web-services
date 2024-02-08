@@ -85,7 +85,7 @@ test origin:
   script:
     - *ansible-template
     - apt-get install openssh-server sudo shellcheck
-    - sed -i 's,fdroidOrigin,localhost,g' hosts.yml
+    - sed -i 's,originserver\.f-droid\.org,localhost,g' hosts.yml
     - ansible-playbook
         --connection local
         --limit localhost

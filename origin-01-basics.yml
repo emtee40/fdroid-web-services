@@ -20,7 +20,7 @@
 
     - name: set hostname
       ansible.builtin.hostname:
-        name: fdroidOrigin
+        name: originserver.f-droid.org
         use: systemd
       when: CI is undefined
 

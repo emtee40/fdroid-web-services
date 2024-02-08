@@ -20,7 +20,7 @@
 
     - name: set hostname
       ansible.builtin.hostname:
-        name: fdroidLink
+        name: fdroid.link
         use: systemd
 
     ##
