@@ -72,3 +72,10 @@ in place.
   o--------------o                                    |
                                                      /
 ```
+
+The actual onion service hostname should only be used for the HTTP connections.
+No other service should be run on it.  For example, the SSH connection should
+either be directly to an IP address or via a dedicated onion service hostname.
+The Ansible inventory hostname should be the HTTP onion service hostname, then
+the operator will need to map that to the IP address or SSH onion service in
+their SSH config (e.g. `~/.ssh/config`).
