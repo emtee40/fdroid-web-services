@@ -1,0 +1,14 @@
+---
+- name: "setup metrics aggregation daemon"
+  hosts: origin
+
+  tasks:
+
+    - assert:
+        that:
+          - ansible_distribution == "Debian"
+          - ansible_distribution_release == "bookworm"
+
+    - name: "blockinfile: configure tor service"
+      include_role:
+        name: 'fdroid-metrics'

@@ -4,3 +4,8 @@
   name: 'ansible-role-secure-sshd'
   scm: 'git'
   version: 6cf673060fa7808596bd91fa3f4be4b4501fad13
+
+- src: 'https://gitlab.com/fdroid/metrics'
+  name: 'fdroid-metrics'
+  scm: 'git'
+  version: 67903355be65aec958f401e3d6db01c7a364c099
