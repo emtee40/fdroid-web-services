@@ -7,7 +7,7 @@
     - assert:
         that:
           - ansible_distribution == "Debian"
-          - ansible_distribution_release == "bullseye"
+          - ansible_distribution_release == "bullseye" or ansible_distribution_release == "bookworm"
 
     - name: "basic nginx setup"
       block:
@@ -17,6 +17,7 @@
             name:
               - nginx
               - geoip-database
+              - libnginx-mod-http-geoip
         - name: "blockinfile: nginx.conf customization"
           blockinfile:
             path: "/etc/nginx/nginx.conf"
