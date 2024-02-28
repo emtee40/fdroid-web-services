@@ -14,8 +14,13 @@
         path: "/etc/tor/torrc"
         marker: "## {mark} ANSIBLE MANAGED BLOCK"
         content: |
+          # public hidden service for website
           HiddenServiceDir /var/lib/tor/{{ onion_address }}/
           HiddenServicePort 80 127.0.0.1:80
+
+          # private hidden service for SSH
+          HiddenServiceDir /var/lib/tor/ssh_hidden_service/
+          HiddenServicePort 22 127.0.0.1:22
       notify: tor_reload
 
   handlers:
