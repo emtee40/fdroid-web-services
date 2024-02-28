@@ -3,7 +3,7 @@
 - src: 'https://gitlab.com/fdroid/ansible-role-secure-sshd.git'
   name: 'ansible-role-secure-sshd'
   scm: 'git'
-  version: 6cf673060fa7808596bd91fa3f4be4b4501fad13
+  version: 80bdfc787be42b8dafe64794d6f675708621bc33
 
 - src: 'https://gitlab.com/fdroid/metrics'
   name: 'fdroid-metrics'
