@@ -7,7 +7,7 @@
     - assert:
         that:
           - ansible_distribution == "Debian"
-          - ansible_distribution_release == "bullseye"
+          - ansible_distribution_release == "bullseye" or ansible_distribution_release == "bookworm"
 
     - name: "blockinfile: configure tor service"
       include_role:

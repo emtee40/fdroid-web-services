@@ -9,7 +9,7 @@
     - assert:
         that:
           - ansible_distribution == "Debian"
-          - ansible_distribution_release == "bullseye"
+          - ansible_distribution_release in ["bullseye", "bookworm"]
 
     - name: "create new ssh private key on cert machine"
       openssh_keypair:
