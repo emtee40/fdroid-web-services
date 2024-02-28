@@ -7,7 +7,7 @@
     - assert:
         that:
           - ansible_distribution == "Debian"
-          - ansible_distribution_release == "bullseye"
+          - ansible_distribution_release in ["bullseye", "bookworm"]
 
     - stat:
         path: "{{ item }}"
