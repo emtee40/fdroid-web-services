@@ -50,6 +50,21 @@ ServerName localhost
     </Files>
   </DirectoryMatch>
 
+  <IfModule mod_mime.c>
+    # this config option is from fdroid-website .htaccess it's purpose is
+    # unclear, but we'll leave it active for now.
+    RemoveLanguage .po
+
+    # workaround for content type header issue. Our convention for translated
+    # html files is to suffix the locale to the file name (e.g. index.html.pl).
+    # Apache interprets file-name suffixes for setting the 'content-type'
+    # header. So we need to make apache unaware of these file types to make
+    # sure in can not deduce a wrong content type. (In browsers a wrong content
+    # type leads to unintended behaviour e.g. downloading the file instead of
+    # displaying it)
+    RemoveType .pl .pt
+  </IfModule>
+
   # Virtualize the language sub"directories"
   AliasMatch ^(?:/(?:ach|af|ak|am|an|anp|ar|ar_DZ|ar_MA|arn|as|ast|ay|az|ba|bar|be|be_Latn|bg|bn|bn_BD|bn_IN|bo|br|brx|bs|bs_Cyrl|bs_Latn|ca|ca@valencia|cgg|ch|chr|ckb|cr|cs|csb|cy|da|de|de_AT|de_CH|doi|dz|el|en|en_AU|en_CA|en_GB|en_IE|en_PH|en_US|en_ZA|eo|es|es_AR|es_MX|es_PR|es_US|et|eu|fa|ff|fi|fil|fo|fr|fr_CA|frp|fur|fy|ga|gd|gl|gu|gun|ha|haw|he|hi|hne|hr|hsb|ht|hu|hy|ia|id|ig|is|it|ja|jbo|jv|ka|kab|kk|kl|km|kn|ko|kok|ks|ksh|ku|kw|ky|la|lb|li|ln|lo|lt|lv|mai|me|mfe|mg|mi|mk|ml|mn|mni|mnk|mr|ms|mt|my|nah|nap|nb|nb_NO|nds|ne|nl|nl_BE|nn|no|nqo|nso|ny|oc|oj|or|os|pa|pap|pl|pms|pr|ps|pt|pt_BR|pt_PT|rm|ro|ru|rw|sa|sah|sat|sc|sco|sd|se|sh|si|sk|sl|sn|so|son|sq|sr|sr_Cyrl|sr_Latn|st|su|sv|sw|szl|ta|te|tg|th|ti|tk|tl|tlh|tlh-qaak|tr|ts|tt|ug|uk|ur|ur_PK|uz|uz_Latn|ve|vec|vi|vls|wa|wo|yi|yo|yue|zh|zh_Hans|zh_Hant|zh_HK|zu)/)?(.*)?$ /var/www/fdroid/$1
 
