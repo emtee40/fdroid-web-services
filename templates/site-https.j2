@@ -51,6 +51,10 @@ server {
                                http_500 http_502 http_503 http_504;
     }
 
+    location /badge {
+        proxy_pass https://fdroid.gitlab.io/artwork/badge;
+    }
+
     location /fdroid/repo {
         proxy_pass https://{{ new_origin_server }}/repo;
     }
