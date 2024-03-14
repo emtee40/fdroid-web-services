@@ -1,21 +1,45 @@
-This project automates the setup arbitrary amount reverse proxies reverse
-proxies in front of a central web server known as the _originserver_.
+# F-Droid Web Services
 
-### _originserver_
+Dev-ops scripts for deploying/maintaining F-Droids web infrastructure.
 
-The _originserver_ is the server in the middle of all the web services:
+## general infos
 
-* Hosts all the files that are available on f-droid.org.
-* Runs Apache [`type-map`](https://httpd.apache.org/docs/current/content-negotiation.html#type-map) for automatic locale selection.
+### install ansible dependencies
+
+```
+ansible-galaxy install -f -r requirements.yml
+```
+
+## deployments
+
+### link
+
+Deployment scripts for [fdroid.link](https://fdroid.link). A minimal apache +
+mod\_md setup. Its sole purpose is to host
+[fdroid-link-js](https://gitlab.com/fdroid/fdroid-link-js).
+
+### originserver
+
+The _originserver_ is F-Droids centeral webserver and currently provides
+following services:
+
+* Hosts all the files are available on f-droid.org. This includes F-Droids
+  website, repo and archive.
+* Runs Apache
+  [`type-map`](https://httpd.apache.org/docs/current/content-negotiation.html#type-map)
+  based content negotiation for automatic locale selection.
 * Receives all the repo files from the _buildserver_.
-* Pushes all the repo files to the [primary mirrors](https://f-droid.org/docs/Running_a_Mirror/).
+* Pushes all the repo files to the [primary
+  mirrors](https://f-droid.org/docs/Running_a_Mirror/).
 
-### HTTPS
+### reverse proxies (fronters/endpints, certmachine)
 
-This setup uses nginx as http server, certbot for automating retreival of tls
-certificates and open ssh for network tunnelning and pushing files from
-cert-server to http-endpoints. It's scripted with ansible and targeting Debian
-bullseye servers.
+These servers terminate HTTP and HTTPS for [f-droid.org](https://f-droid.org).
+They're currently confgured to do round robin DNS.
+
+This setup uses nginx as HTTP server, certbot for automating retreival of TLS
+certificates and open ssh for network tunnelning and pushing files from our
+certmachine server to http-endpoints.
 
 ```
                                                     \
@@ -31,27 +55,31 @@ bullseye servers.
      o-------------o----------------------o    |
      |                                         |
      |                                         |    \
-     |                             o-------------o   | maching for
+     |                             o-------------o   | managing
      |                             |             |   | tls certs
-     |                             | cert-server |   | (certbot)
+     |                             | certmachine |   | (certbot)
      |                             |             |   |
      |                             o-------------o   |
      |                                              /
      |
      |                                              \
   o--------------o                                   |
-  |              |                                   | upstream
+  |              |                                   | central
   | originserver |                                   | web server
   |              |                                   |
   o--------------o                                   |
                                                     /
 ```
 
-### HTTP over .onion
+### onion
 
-The setup for running our tor onion service servers is straight forward.  Right
-now ansible roles assume a correctly configured hidden service dir is already
-in place.
+F-Droids official onion service.
+
+[fdroidorg6cooksyluodepej4erfctzk7rrjpjbbr6wx24jh3lqyfwyd.onion](http://fdroidorg6cooksyluodepej4erfctzk7rrjpjbbr6wx24jh3lqyfwyd.onion)
+
+This setup could deploy multiple onion service servers, however we're currently
+just operating one. Right now ansible roles assume that a correctly configured
+hidden service dir is already in place.
 
 ```
                                                      \
