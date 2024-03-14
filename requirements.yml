@@ -9,3 +9,13 @@
   name: 'fdroid-metrics'
   scm: 'git'
   version: 67903355be65aec958f401e3d6db01c7a364c099
+
+- src: 'https://gitlab.com/uniqx/ansible-debian9-certbot'
+  name: 'ansible-debian9-certbot'
+  scm: 'git'
+  version: c154a74548af7bb3eae46ef908f1a2da91196cfe  # 0.1.1
+
+- src: 'https://gitlab.com/uniqx/ansible-debian9-nginx-site-tls'
+  name: 'ansible-debian9-nginx-site-tls'
+  scm: 'git'
+  version: deaf9097cc97359e81e197e667fda0671975f087  # 0.5.0

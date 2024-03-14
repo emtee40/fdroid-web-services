@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: 2020 Michael Pöhn <michael.poehn@fsfe.org>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+---
+
+- name: "deploy F-Droid monitor"
+  hosts: monitor.f-droid.org
+
+  tasks:
+
+    - name: "fdroid-monitor user"
+      user:
+        name: fdroid-monitor
+        # group: fdroid-monitor
+    - apt:
+        pkg:
+          - git
+          - python3-tornado
+    - git:
+        repo: 'https://gitlab.com/uniqx/fdroid-monitor.git'
+        dest: '/srv/fdroid-monitor'
+        version: '25c73f3ff14f2d8d135b84e9a804b03f78342b91'  # v0.6.16
+      notify:
+        - restart_service
+    - copy:
+        dest: '/etc/systemd/system/fdroid-monitor.service'
+        content: |
+          [Unit]
+          Description=F-Droid Monitor Web-App
+          AssertPathExists=/srv/fdroid-monitor
+
+          [Service]
+          Restart=always
+          User=fdroid-monitor
+          WorkingDirectory=/srv/fdroid-monitor
+          ExecStart=python3 -m fdroidmonitor
+
+          [Install]
+          WantedBy=default.target
+      notify:
+        - systemd_reload_daemon
+        - restart_service
+    - systemd:
+        name: fdroid-monitor.service
+        enabled: true
+
+  handlers:
+    - name: systemd_reload_daemon
+      systemd:
+        daemon_reload: true
+    - name: restart_service
+      systemd:
+        name: fdroid-monitor.service
+        state: restarted
