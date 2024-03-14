@@ -1,0 +1,178 @@
+---
+- name: "basic firewall setup"
+  hosts:
+    - monitor.f-droid.org
+
+  tasks:
+
+    - assert:
+        that: "{{ item }}"
+      with_items:
+        - ansible_distribution == 'Debian'
+        - ansible_distribution_release == 'bullseye'
+
+    - name: lock root account password (for preventing other than pubkey-auth logins)
+      user: name=root password_lock=yes
+
+    ##
+    # hostname
+    #
+
+    - name: set hostname
+      ansible.builtin.hostname:
+        name: "{{ endpoint_hostname }}"
+        use: systemd
+      when: inventory_hostname in groups['endpoints']
+
+    ##
+    # APT
+    #
+
+    - name: "apt: install debian packages for ansible secure apt setup"
+      apt:
+        install_recommends: no
+        update_cache: yes
+        name:
+          - iptables-persistent
+        state: present
+        cache_valid_time: 8640000  # ommit cache update when chache has been updated in the last 100 days
+
+    - name: "apt_repository: deb.debian.org"
+      copy:
+        content: |
+          deb https://deb.debian.org/debian/ {{ ansible_distribution_release }} main
+          #deb-src https://deb.debian.org/debian/ {{ ansible_distribution_release }} main
+          deb https://deb.debian.org/debian/ {{ ansible_distribution_release }}-updates main
+          #deb-src https://deb.debian.org/debian/ {{ ansible_distribution_release }}-updates main
+          deb https://deb.debian.org/debian-security/ {{ ansible_distribution_release }}-security main
+          #deb-src https://deb.debian.org/debian-security/ {{ ansible_distribution_release }}-security main
+          deb https://deb.debian.org/debian/ {{ ansible_distribution_release }}-backports main
+          #deb-src https://deb.debian.org/debian/ {{ ansible_distribution_release }}-backports main
+        dest: /etc/apt/sources.list.d/9.deb.debian.org.list
+
+    - name: "apt_repository: security.debian.org"
+      apt_repository:
+        repo: 'deb https://security.debian.org/debian-security/ {{ ansible_distribution_release }}-security main'
+        state: present
+        filename: 9.security.debian.org
+        update_cache: yes
+
+    - name: "copy: clear /etc/apt/sources.list"
+      copy:
+        content: ""
+        dest: "/etc/apt/sources.list"
+
+    - name: search for rouge pre-configured apt source list files
+      find:
+        paths: "/etc/apt/sources.list.d/"
+        file_type: file
+        excludes:
+          - "9.deb.debian.org.list"
+          - "9.security.debian.org.list"
+      register: rouge_apt_source_list_files
+
+    - name: delete rouge pre-configured apt source list files
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ rouge_apt_source_list_files['files'] }}"
+
+    - name: "include_role: set up unattended-upgrades"
+      include_role:
+        name: unattended_upgrades
+
+    ##
+    # install and configure some basic tools
+    #
+
+    - name: install some basic tools
+      apt:
+        install_recommends: no
+        state: present
+        name:
+          - vim
+    - name: setup basic vimrc
+      copy:
+        dest: /root/.vimrc
+        content: |
+          syntax on
+          set mouse-=a
+        owner: root
+        group: root
+        mode: 0644
+
+    ##
+    # SSH
+    #
+
+    - name: "sshd - require public key authentication, disallow password auth"
+      lineinfile:
+        path: '/etc/ssh/sshd_config'
+        regexp: '^[\s#]*PasswordAuthentication .*'
+        line: 'PasswordAuthentication no'
+      notify: reload_sshd
+
+    - name: "sshd - require public key authentication, disallow password auth"
+      lineinfile:
+        path: '/etc/ssh/sshd_config'
+        regexp: '^[\s#]*PermitRootLogin .*'
+        line: 'PermitRootLogin prohibit-password'
+      notify: reload_sshd
+
+
+    - name: "ssh - authorized_keys: setup additional admin pub-keys"
+      authorized_key:
+        user: root
+        key: "{{ item.key }}"
+        state: present
+        # unique: yes
+      with_list: "{{ authorized_keys }}"
+      when: inventory_hostname in groups['endpoints']
+
+
+    ##
+    # firewall
+    #
+
+    - name: "deploy persistent ipv4 iptables firewall rules"
+      copy:
+        dest: /etc/iptables/rules.v4
+        content: |
+            *filter
+            :INPUT DROP [0:0]
+            :FORWARD ACCEPT [0:0]
+            :OUTPUT ACCEPT [0:0]
+            -A INPUT -i lo -j ACCEPT
+            -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+            -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+            -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+            -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+            -A INPUT -p icmp --icmp-type 8 -j ACCEPT
+            COMMIT
+      notify: reload_iptables
+    - name: "deploy persistent ipv6 iptables firewall rules"
+      copy:
+        dest: /etc/iptables/rules.v6
+        content: |
+            *filter
+            :INPUT DROP [0:0]
+            :FORWARD ACCEPT [0:0]
+            :OUTPUT ACCEPT [0:0]
+            -A INPUT -i lo -j ACCEPT
+            -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+            -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+            -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+            -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+            -A INPUT -p icmpv6 -j ACCEPT
+            COMMIT
+      notify: reload_iptables
+
+  handlers:
+    - name: reload_iptables
+      systemd:
+        name: netfilter-persistent.service
+        state: restarted
+    - name: reload_sshd
+      systemd:
+        name: sshd.service
+        state: reloaded
