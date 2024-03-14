@@ -15,11 +15,18 @@
     - apt:
         pkg:
           - git
+          - tor
+          - python3-humanize
+          - python3-pycurl
           - python3-tornado
+    - service:
+        name: tor
+        state: started
+        enabled: true
     - git:
-        repo: 'https://gitlab.com/uniqx/fdroid-monitor.git'
+        repo: 'https://gitlab.com/fdroid/fdroid-monitor.git'
         dest: '/srv/fdroid-monitor'
-        version: '25c73f3ff14f2d8d135b84e9a804b03f78342b91'  # v0.6.16
+        version: 'be8cea434e2a288bb85cfd64d861b9554e94b9cf'  # v0.7.0
       notify:
         - restart_service
     - copy:
