@@ -40,7 +40,7 @@
             state: link
         - name: "nginx : deploy http config"
           template:
-            src: site-onion-http.j2
+            src: onion/site-http.j2
             dest: "/etc/nginx/sites-available/http"
             owner: root
             group: root
