@@ -45,19 +45,34 @@
 
     - name: "copy: push-to-mirror.sh push script"
       copy:
-        src: push-to-mirror.sh
+        src: origin/push-to-mirror.sh
         dest: /home/fdroid/push-to-mirror.sh
         mode: 0755
         owner: root
         group: root
 
-    - name: "copy: ssh_known_hosts for push mirror servers"
-      copy:
-        src: ssh_known_hosts
-        dest: /etc/ssh/ssh_known_hosts
-        owner: root
-        group: root
-        mode: 0644
+    - name: "known_hosts: deploy ssh_known_hosts for push mirror servers"
+      known_hosts:
+        path: /etc/ssh/ssh_known_hosts
+        key: "{{ item.key }}"
+        name: "{{ item.name }}"
+      loop:
+        - name: "ftp-push.lysator.liu.se"
+          key: "ftp-push.lysator.liu.se ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDIBdWAds/yjGT9GmfMYfCup0hgpyGLmcq++iLNn7Puy+wBY4jCseISAbJQmVpaR/0tWhBwvANho/D9NdhJ3EuQh72gcMqX6vVaUsY/s+wQzRvfwWtmTha6Wh12rXI9dXyypIJiwRwwtrDDHQITwkj2+yvZHPaqqT/JQsk/CDOW4uXSEKYYxu3E3QUWq6Q1gvuB/7NYKJyIICVINXEoShmJ+E4t0JpJBu0ar+dgM2bIfJ15EqfBypmkxlNjAv01LpmllBGr9nYP/+31PYJ3ifa/ug/eQI44Sq3IrOEdjW8Wi7tD0Bn/TZQmxXm3sK/Rqa3fn7ZgkOoUkryyN+MDw1Ozp0iJ6eODCbXDYhvTOONhWV5q6iHYj1fTSoi0cGt9HMXqx4ggrIJNW0fB+8/D9piqn4gkLE7vtUFL3LeEikJd8Dwrn2YZzrPKkn33S2df3xSiNt+giHMChD4ecwAtazKV0li+wPRyo2vDYyhdwQ+s1pyaGFYFm3qHAlU9ZONyqLk="
+        - name: "ftp-push.lysator.liu.se"
+          key: "ftp-push.lysator.liu.se ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBDF8T2/UVaKEkFnZSjV1ZHjf60ghqXoMERhomqcTKbxs2iTmh3O0sMNlZWLfKkogHkv5tT+UWPKgUHXaFyAW9i8="
+        - name: "ftp-push.lysator.liu.se"
+          key: "ftp-push.lysator.liu.se ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMbOrp04VlS47FpWfeXncNlPde2OA8kuXcBVgUAJS19Z"
+        - name: "plug-mirror.rcac.purdue.edu"
+          key: "plug-mirror.rcac.purdue.edu ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8v6WZg0XrVnGOql6xTJyHOgK06qIzMU0RCCEetXzsE5WcgHCbzmp6AIG/OUI3ytTzkOn/Zxcwbdmr6qj01qPsCI8yVCXgLXRdqJ+bq1RQVPZ2ptOvwwAHcu7SgcftgX7xQm1aj0GDksg+b+LPADCX/HcZMVYUMPT+9WtVhWb5F3cQYYk9EpVxs+cJg3+ZnAXGvQQQ6U0a51pmHyLuP4kedv7E+CMGiuLrYabolLjtW1JpJerRSVBm5yTfBzVLWzvIaX6W/elWM1kKmNDL/mYVFWhRMaOGHzFD5zgt6Ah4gpjaEREyZPfE4brzlEbegSZ4TweP71RqDgU7qNaiykhh"
+        - name: "plug-mirror.rcac.purdue.edu"
+          key: "plug-mirror.rcac.purdue.edu ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBN2SEYj5rUZ2O275Jl37cZEe+6kYrDlmJ1pI2ei4VH3uR7PPNJxEjyI5cDq+OZnTba5Ei5l1yWLS5kJeacj5kqQ="
+        - name: "plug-mirror.rcac.purdue.edu"
+          key: "plug-mirror.rcac.purdue.edu ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKVeIf2MeIlSdP42v/4m8aSmRqDpnyvdlY5ea6bayOxA"
+        - name: "ftp.agdsn.de"
+          key: "ftp.agdsn.de ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDPY3CmKwR/NB9RYSPYayF5r73l0s3463eq+d6YLv63qgbbOQDCmNvpdcWU/baCq8ETgnrGUYpJRledfYvPQHa8OPT8Gegr9XOO/gyTKXMgeKuAxZnbIwcDO6Xk7Fkq3hmWQTDxk0kPLfsHyQ5BmO6FKpnb8ZmcIA4XTObUKFQwf6hk1zKtTVrHjWR/j3s4QFVoUEXMP+VRgqKdBSfr29Ng5sewVhsVRS0pD7+b5+HQfHqrQ4lIt6Rd7NiccSoPj4J7eSjwUqm6p95keODmm2t7OXzJ4gaYYT4RK+naXka/A+jAJI2DlWmYF7/dzNfo8i32U6HBJMDaQmjxZ4kgxIhj"
+        - name: "ftp.agdsn.de"
+          key: "ftp.agdsn.de ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPgzKn6a29uc1MGC9dYqmq2rI2tgAhWZbLSuVVldAUci"
 
     - name: "copy: cronjob to push to ftp-push.lysator.liu.se"
       copy:

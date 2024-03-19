@@ -52,7 +52,7 @@ shellcheck:
   stage: lint
   script:
     - apt-get install shellcheck
-    - shellcheck files/push-to-mirror.sh
+    - shellcheck files/origin/push-to-mirror.sh
 
 jinja2 check:
   stage: lint

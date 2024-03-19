@@ -63,7 +63,7 @@
         mode: 0644
         owner: root
         group: root
-        src: "{{ item }}"
+        src: "origin/{{ item }}"
         dest: "/etc/apache2/conf-available/{{ item }}"
       notify: restart_apache2
       with_items:
@@ -117,7 +117,7 @@
 
     - name: "copy: deploy apache sites"
       template:
-        src: site-fdroid-origin.conf.j2
+        src: origin/site-fdroid.conf.j2
         dest: /etc/apache2/sites-available/fdroid-origin.conf
         owner: root
         group: root
