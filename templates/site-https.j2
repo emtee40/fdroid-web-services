@@ -67,4 +67,12 @@ server {
     location ~ .*/packages/(com\.jparkie\.aizoban|eu\.kanade\.tachiyomi|org\.nv95\.openmanga)/$ {
         return 404;
     }
+
+    # stopgap measure for take-down: https://gitlab.com/fdroid/admin/-/issues/474
+    location ~ .*/packages/ie\.equalit\.ceno/$ {
+        if ( $geoip_country_code = "RU") {
+            return 404;
+        }
+        proxy_pass https://{{ new_origin_server }};
+    }
 }
