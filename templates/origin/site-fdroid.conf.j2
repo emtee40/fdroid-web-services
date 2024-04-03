@@ -63,6 +63,11 @@ ServerName localhost
     # type leads to unintended behaviour e.g. downloading the file instead of
     # displaying it)
     RemoveType .pl .pt
+
+    # /etc/mime.types specifies .asc as application/pgp-keys, but an GnuPG ASCII
+    # file can be keys, encrypted content, and/or a signature.  On this site,
+    # .asc is used only for application/pgp-signature
+    AddType application/pgp-signature .asc
   </IfModule>
 
   # Virtualize the language sub"directories"
