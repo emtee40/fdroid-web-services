@@ -11,6 +11,27 @@
 
     - name: "basic nginx setup"
       block:
+        - name: "pin geoip-database from bookworm-backports"
+          block:
+            - name: "apt_repository: enable bookworm-backports on bullseye based endpoints"
+              apt_repository:
+                repo: 'deb https://deb.debian.org/debian bookworm-backports main'
+                state: present
+                filename: bookworm-backports
+                update_cache: no
+              when: inventory_hostname in groups['endpoints'] and ansible_distribution_release == 'bullseye'
+            - name: "copy: apt pinning rule for bookworm-backports packages"
+              copy:
+                content: |
+                  Package: geoip-database
+                  Pin: release n=bookworm-backports
+                  Pin-Priority: 900
+                dest: /etc/apt/preferences.d/debian-bookworm-backports.pref
+                mode: 0644
+                owner: root
+                group: root
+              when: inventory_hostname in groups['endpoints'] and ansible_distribution_release in ['bullseye', 'bookworm']
+
         - apt:
             install_recommends: no
             state: present
