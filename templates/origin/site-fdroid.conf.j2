@@ -28,7 +28,8 @@ ServerName localhost
   SSLCertificateKeyFile   /etc/ssl/private/snakeoil.key.pem
   Header always set Strict-Transport-Security "max-age=63072000"
 
-  DocumentRoot /var/www/html
+  # direct connections to the IP address should just show an error page
+  DocumentRoot /nonexistent
 </VirtualHost>
 
 <VirtualHost {{ new_origin_server }}:443>
