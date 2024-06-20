@@ -63,6 +63,11 @@ server {
         proxy_pass https://{{ new_origin_server }}/archive;
     }
 
+    # stopgap measure for take-down: https://gitlab.com/fdroid/admin/-/issues/487
+    location ~ .*/packages/com\.alaskalinuxuser\.justcraigslist/$ {
+        return 404;
+    }
+
     # stopgap measure for take-down: https://gitlab.com/fdroid/admin/-/issues/428
     location ~ .*/packages/(com\.jparkie\.aizoban|eu\.kanade\.tachiyomi|org\.nv95\.openmanga)/$ {
         if ( $geoip_country_code = "DE") {
