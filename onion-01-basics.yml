@@ -75,6 +75,7 @@
             -A INPUT -i lo -j ACCEPT
             -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
             -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+            -A INPUT -p udp -j DROP
             COMMIT
       notify: reload_iptables
     - name: "deploy persistent ipv6 iptables firewall rules"
@@ -88,6 +89,7 @@
             -A INPUT -i lo -j ACCEPT
             -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
             -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+            -A INPUT -p udp -j DROP
             COMMIT
       notify: reload_iptables
 
