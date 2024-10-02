@@ -26,7 +26,7 @@
     - git:
         repo: 'https://gitlab.com/fdroid/fdroid-monitor.git'
         dest: '/srv/fdroid-monitor'
-        version: '851d126d6b5fa717b4e3f3596aef7f6202d2d928'  # v0.8.0
+        version: 'ba3712f750c02b592086859753ebccb8b5fb46a6'  # v0.8.1
       notify:
         - restart_service
     - copy:
