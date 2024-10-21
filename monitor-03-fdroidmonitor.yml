@@ -5,6 +5,8 @@
 
 - name: "deploy F-Droid monitor"
   hosts: monitor.f-droid.org
+  vars_files:
+    - group_vars/all/secret.yml
 
   tasks:
 
@@ -17,6 +19,7 @@
           - git
           - tor
           - python3-humanize
+          - python3-matrix-nio
           - python3-pycurl
           - python3-tornado
     - service:
@@ -26,7 +29,7 @@
     - git:
         repo: 'https://gitlab.com/fdroid/fdroid-monitor.git'
         dest: '/srv/fdroid-monitor'
-        version: 'ba3712f750c02b592086859753ebccb8b5fb46a6'  # v0.8.1
+        version: '559b1b14d229684f706faf90ceab987175ba2ef7'  # v0.8.2
       notify:
         - restart_service
     - copy:
@@ -46,6 +49,18 @@
           WantedBy=default.target
       notify:
         - systemd_reload_daemon
+        - restart_service
+    - file:
+        path: /etc/fdroid-monitor
+        state: directory
+        owner: fdroid-monitor
+        mode: 0600
+    - copy:
+        dest: /etc/fdroid-monitor/fmcfg.ini
+        content: "{{ monitor_cfg }}"
+        owner: fdroid-monitor
+        mode: 0400
+      notify:
         - restart_service
     - systemd:
         name: fdroid-monitor.service
