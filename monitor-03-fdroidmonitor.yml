@@ -10,11 +10,12 @@
 
   tasks:
 
-    - name: "fdroid-monitor user"
+    - name: "user: setup fdroid-monitor"
       user:
         name: fdroid-monitor
         # group: fdroid-monitor
-    - apt:
+    - name: "apt: install dependencies for F-Droid Monitor"
+      apt:
         pkg:
           - git
           - tor
@@ -22,17 +23,20 @@
           - python3-matrix-nio
           - python3-pycurl
           - python3-tornado
-    - service:
+    - name: "service: make sure tor is started and enabled"
+      service:
         name: tor
         state: started
         enabled: true
-    - git:
+    - name: "git: install/update pinned F-Droid Monitor version"
+      git:
         repo: 'https://gitlab.com/fdroid/fdroid-monitor.git'
         dest: '/srv/fdroid-monitor'
-        version: '3280f68e2672bce0055bc4f984bb367e3d81245d'  # v0.8.3
+        version: '46f036628eee872b6ca7bf4bdff48c9db19eaabf'  # v0.8.4
       notify:
         - restart_service
-    - copy:
+    - name: "copy: setup fdroid-monitor.service file to esablish monitor as systemd daemon"
+      copy:
         dest: '/etc/systemd/system/fdroid-monitor.service'
         content: |
           [Unit]
@@ -50,20 +54,24 @@
       notify:
         - systemd_reload_daemon
         - restart_service
-    - file:
+    - name: "file: make sure /etc/fdroid-monitor dir is present"
+      file:
         path: /etc/fdroid-monitor
         state: directory
         owner: fdroid-monitor
         mode: 0600
-    - copy:
+    - name: "copy: copy montitor config to server"
+      copy:
         dest: /etc/fdroid-monitor/fmcfg.ini
         content: "{{ monitor_cfg }}"
         owner: fdroid-monitor
         mode: 0400
       notify:
         - restart_service
-    - systemd:
+    - name: "systemd: make sure monitor daemon is enabled and started"
+      systemd:
         name: fdroid-monitor.service
+        state: started
         enabled: true
 
   handlers:
