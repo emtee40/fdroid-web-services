@@ -3,6 +3,9 @@
   hosts:
     - monitor.f-droid.org
 
+  vars_files:
+    - group_vars/all/secret.yml
+
   tasks:
 
     - assert:
@@ -11,14 +14,14 @@
         - ansible_distribution == 'Debian'
         - ansible_distribution_release == 'bookworm'
 
-    - name: lock root account password (for preventing other than pubkey-auth logins)
+    - name: "user: lock root account password (for preventing other than pubkey-auth logins)"
       user: name=root password_lock=yes
 
     ##
     # hostname
     #
 
-    - name: set hostname
+    - name: "hostname: set hostname"
       ansible.builtin.hostname:
         name: "{{ endpoint_hostname }}"
         use: systemd
@@ -37,7 +40,7 @@
         state: present
         cache_valid_time: 8640000  # ommit cache update when chache has been updated in the last 100 days
 
-    - name: "apt_repository: deb.debian.org"
+    - name: "copy: deploy apt source list 9.deb.debian.org.list"
       copy:
         content: |
           deb https://deb.debian.org/debian/ {{ ansible_distribution_release }} main
@@ -50,7 +53,7 @@
           #deb-src https://deb.debian.org/debian/ {{ ansible_distribution_release }}-backports main
         dest: /etc/apt/sources.list.d/9.deb.debian.org.list
 
-    - name: "apt_repository: security.debian.org"
+    - name: "apt_repository: deploy 9.security.debian.org.list"
       apt_repository:
         repo: 'deb https://security.debian.org/debian-security/ {{ ansible_distribution_release }}-security main'
         state: present
@@ -62,7 +65,7 @@
         content: ""
         dest: "/etc/apt/sources.list"
 
-    - name: search for rouge pre-configured apt source list files
+    - name: "find: search for rouge pre-configured apt source list files"
       find:
         paths: "/etc/apt/sources.list.d/"
         file_type: file
@@ -71,7 +74,7 @@
           - "9.security.debian.org.list"
       register: rouge_apt_source_list_files
 
-    - name: delete rouge pre-configured apt source list files
+    - name: "file: delete rouge pre-configured apt source list files"
       file:
         path: "{{ item.path }}"
         state: absent
@@ -85,13 +88,13 @@
     # install and configure some basic tools
     #
 
-    - name: install some basic tools
+    - name: "apt: install vim"
       apt:
         install_recommends: no
         state: present
         name:
           - vim
-    - name: setup basic vimrc
+    - name: "copy: minimal .vimrc for root user"
       copy:
         dest: /root/.vimrc
         content: |
@@ -105,14 +108,14 @@
     # SSH
     #
 
-    - name: "sshd - require public key authentication, disallow password auth"
+    - name: "lineinfile: sshd - require public key authentication, disallow password auth"
       lineinfile:
         path: '/etc/ssh/sshd_config'
         regexp: '^[\s#]*PasswordAuthentication .*'
         line: 'PasswordAuthentication no'
       notify: reload_sshd
 
-    - name: "sshd - require public key authentication, disallow password auth"
+    - name: "lineinfile: sshd - require public key authentication, disallow password auth"
       lineinfile:
         path: '/etc/ssh/sshd_config'
         regexp: '^[\s#]*PermitRootLogin .*'
@@ -120,13 +123,13 @@
       notify: reload_sshd
 
 
-    - name: "ssh - authorized_keys: setup additional admin pub-keys"
+    - name: "lineinfile: ssh - authorized_keys: setup additional admin pub-keys"
       authorized_key:
         user: root
         key: "{{ item.key }}"
         state: present
         # unique: yes
-      with_list: "{{ authorized_keys }}"
+      with_list: "{{ authorized_keys }}"  # from group_vars/all/secret.yml
       when: inventory_hostname in groups['endpoints']
 
 
@@ -134,7 +137,7 @@
     # firewall
     #
 
-    - name: "deploy persistent ipv4 iptables firewall rules"
+    - name: "copy: deploy persistent ipv4 iptables firewall rules"
       copy:
         dest: /etc/iptables/rules.v4
         content: |
@@ -150,7 +153,7 @@
             -A INPUT -p icmp --icmp-type 8 -j ACCEPT
             COMMIT
       notify: reload_iptables
-    - name: "deploy persistent ipv6 iptables firewall rules"
+    - name: "copy: deploy persistent ipv6 iptables firewall rules"
       copy:
         dest: /etc/iptables/rules.v6
         content: |
