@@ -1,0 +1,42 @@
+#! /usr/bin/env python3
+
+import sys
+import json
+import socket
+import urllib.request
+
+
+# matrix access credentials from 'group_vars/all/secrect.yml' vault
+MATRIX_SERVER = "{{ matrix_server }}"
+MATRIX_TOKEN = "{{ matrix_token }}"
+MATRIX_ROOM = "{{ matrix_devops_room }}"
+
+
+def matrix_send(msg):
+    url = f"{MATRIX_SERVER}_matrix/client/r0/rooms/{MATRIX_ROOM}/send/m.room.message"
+    data = {
+        "msgtype": "m.text",
+        "body": msg,
+    }
+    headers = {
+        "Authorization": f"Bearer {MATRIX_TOKEN}",
+        "Content-Type": "application/json",
+    }
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(data).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+    with urllib.request.urlopen(req) as response:
+        response_body = response.read()
+        return json.loads(response_body)
+
+
+if __name__ == "__main__":
+    matrix_send(
+        "needrestart trigger on {}:\n\n{}".format(
+            socket.getfqdn(),
+            sys.stdin.read(),
+        )
+    )

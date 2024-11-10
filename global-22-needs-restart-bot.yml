@@ -1,0 +1,26 @@
+---
+- name: "setup needrestart matrix notifications"
+  hosts:
+    - link
+    - monitor
+    - onions
+  vars_files:
+    - group_vars/all/secret.yml
+
+  tasks:
+
+    - name: "apt: make sure needrestart is installed"
+      apt:
+        name:
+          - python3
+          - needrestart
+        state: present
+        update_cache: no
+        install_recommends: no
+    - name: "template: write matrix_send config file"
+      template:
+        src: "needrestart/100-matrix.py.j2"
+        dest: "/etc/needrestart/notify.d/100-matrix.py"
+        owner: root
+        group: root
+        mode: '0700'
