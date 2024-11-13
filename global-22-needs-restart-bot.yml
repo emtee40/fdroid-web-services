@@ -17,10 +17,24 @@
         state: present
         update_cache: no
         install_recommends: no
+    - name: "file: make sure /root/bin folder is present"
+      file:
+        path: "/root/bin"
+        state: directory
+        owner: root
+        group: root
+        mode: 0700
     - name: "template: write matrix_send config file"
       template:
-        src: "needrestart/100-matrix.py.j2"
-        dest: "/etc/needrestart/notify.d/100-matrix.py"
+        src: "needrestart-check-and-notify.py.j2"
+        dest: "/root/bin/needrestart-check-and-notify.py"
         owner: root
         group: root
         mode: '0700'
+    - name: "copy: setup apt hook for triggering needrestart notification checks"
+      copy:
+        dest: "/etc/apt/apt.conf.d/10-needrestart-check-and-notify"
+        content: |
+          APT::Update::Post-Invoke-Success {
+              "/root/bin/needrestart-check-and-notify.py &";
+          };

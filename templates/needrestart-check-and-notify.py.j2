@@ -1,0 +1,64 @@
+#! /usr/bin/env python3
+
+#
+# This script uses `needrestart` to figure out if the kernel or any services
+# got upgraded and need to be restarted. If so it will send a notification to
+# a matrix chat room.
+#
+
+import sys
+import json
+import socket
+import subprocess
+import urllib.request
+
+
+# matrix access credentials from 'group_vars/all/secrect.yml' vault
+MATRIX_SERVER = "{{ matrix_server }}"
+MATRIX_TOKEN = "{{ matrix_token }}"
+MATRIX_ROOM = "{{ matrix_devops_room }}"
+
+
+def matrix_send(msg):
+    url = f"{MATRIX_SERVER}_matrix/client/r0/rooms/{MATRIX_ROOM}/send/m.room.message"
+    data = {
+        "msgtype": "m.text",
+        "body": msg,
+    }
+    headers = {
+        "Authorization": f"Bearer {MATRIX_TOKEN}",
+        "Content-Type": "application/json",
+    }
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(data).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+    with urllib.request.urlopen(req) as response:
+        response_body = response.read()
+        return json.loads(response_body)
+
+
+def check_need_reboot():
+    raw = str(subprocess.check_output(["needrestart", "-klb"]), "utf-8")
+    expected_kernel = None
+    actual_kernel = None
+    for line in raw.split("\n"):
+        if line.startswith("NEEDRESTART-KEXP: "):
+            expected_kernel = line.split(" ", 1)[1]
+        elif line.startswith("NEEDRESTART-KCUR: "):
+            actual_kernel = line.split(" ", 1)[1]
+    if (
+        expected_kernel and (expected_kernel != actual_kernel)
+    ) or "NEEDRESTART-SVC: " in raw:
+        matrix_send(
+            "needrestart trigger on {}:\n\n{}".format(
+                socket.getfqdn(),
+                raw,
+            )
+        )
+
+
+if __name__ == "__main__":
+    check_need_reboot()
