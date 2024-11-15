@@ -32,7 +32,7 @@
       git:
         repo: 'https://gitlab.com/fdroid/fdroid-monitor.git'
         dest: '/srv/fdroid-monitor'
-        version: '46f036628eee872b6ca7bf4bdff48c9db19eaabf'  # v0.8.4
+        version: 'fc4adbcfbe89eae78a536cd70da3cdf2e317cbfa'  # v0.8.5
       notify:
         - restart_service
     - name: "copy: setup fdroid-monitor.service file to esablish monitor as systemd daemon"
