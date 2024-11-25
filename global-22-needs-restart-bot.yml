@@ -1,9 +1,12 @@
 ---
 - name: "setup needrestart matrix notifications"
   hosts:
-    - link
-    - monitor
+    - endpoints
+    - certmachine
     - onions
+    - link
+    - origin
+    - monitor
   vars_files:
     - group_vars/all/secret.yml
 
