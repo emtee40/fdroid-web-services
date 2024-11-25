@@ -8,7 +8,7 @@
 
 import sys
 import json
-import socket
+import pathlib
 import subprocess
 import urllib.request
 
@@ -49,12 +49,13 @@ def check_need_reboot():
             expected_kernel = line.split(" ", 1)[1]
         elif line.startswith("NEEDRESTART-KCUR: "):
             actual_kernel = line.split(" ", 1)[1]
+    hostname = pathlib.Path('/etc/hostname').read_text().strip()
     if (
         expected_kernel and (expected_kernel != actual_kernel)
     ) or "NEEDRESTART-SVC: " in raw:
         matrix_send(
             "needrestart trigger on {}:\n\n{}".format(
-                socket.getfqdn(),
+                hostname
                 raw,
             )
         )
