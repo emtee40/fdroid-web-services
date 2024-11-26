@@ -7,10 +7,9 @@
   tasks:
 
     - assert:
-        that: "{{ item }}"
-      with_items:
-        - ansible_distribution == 'Debian'
-        - ansible_distribution_release in ['bullseye', 'bookworm']
+        that:
+          - ansible_distribution == 'Debian'
+          - ansible_distribution_release in ['bullseye', 'bookworm']
 
     - name: lock root account password (for preventing other than pubkey-auth logins)
       user: name=root password_lock=yes
@@ -32,13 +31,13 @@
       copy:
         content: |
           deb https://deb.debian.org/debian/ {{ ansible_distribution_release }} main
-          #deb-src https://deb.debian.org/debian/ {{ ansible_distribution_release }} main
+          # deb-src https://deb.debian.org/debian/ {{ ansible_distribution_release }} main
           deb https://deb.debian.org/debian/ {{ ansible_distribution_release }}-updates main
-          #deb-src https://deb.debian.org/debian/ {{ ansible_distribution_release }}-updates main
+          # deb-src https://deb.debian.org/debian/ {{ ansible_distribution_release }}-updates main
           deb https://deb.debian.org/debian-security/ {{ ansible_distribution_release }}-security main
-          #deb-src https://deb.debian.org/debian-security/ {{ ansible_distribution_release }}-security main
+          # deb-src https://deb.debian.org/debian-security/ {{ ansible_distribution_release }}-security main
           deb https://deb.debian.org/debian/ {{ ansible_distribution_release }}-backports main
-          #deb-src https://deb.debian.org/debian/ {{ ansible_distribution_release }}-backports main
+          # deb-src https://deb.debian.org/debian/ {{ ansible_distribution_release }}-backports main
         dest: /etc/apt/sources.list.d/9.deb.debian.org.list
 
     - name: "apt_repository: security.debian.org"
@@ -60,6 +59,7 @@
         excludes:
           - "9.deb.debian.org.list"
           - "9.security.debian.org.list"
+          - "bookworm-backports.list"
       register: rouge_apt_source_list_files
 
     - name: delete rouge pre-configured apt source list files
